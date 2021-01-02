@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="工作中用到了, 就稍微写下.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="可执行文件符号表导出与使用">
+<meta property="og:url" content="http://example.com/2021/01/02/binary-symbols-with-debug/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="工作中用到了, 就稍微写下.">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2021-01-02T13:31:00.000Z">
+<meta property="article:modified_time" content="2021-01-02T13:34:40.947Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="linux">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://example.com/2021/01/02/binary-symbols-with-debug/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>可执行文件符号表导出与使用 | Hexo</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hexo</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/01/02/binary-symbols-with-debug/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          可执行文件符号表导出与使用
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2021-01-02 21:31:00 / Modified: 21:34:40" itemprop="dateCreated datePublished" datetime="2021-01-02T21:31:00+08:00">2021-01-02</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>工作中用到了, 就稍微写下.</p>
+<a id="more"></a>
+
+<h2 id="可执行文件处理"><a href="#可执行文件处理" class="headerlink" title="可执行文件处理"></a>可执行文件处理</h2><h3 id="编译时加入-debug-信息选项"><a href="#编译时加入-debug-信息选项" class="headerlink" title="编译时加入 debug 信息选项"></a>编译时加入 debug 信息选项</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">CFLAG += -Og -g3</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> -Og 该标识会精心挑选部分与 -g 选项不冲突的优化选项, 当然就能提供合理的优化水平, 同时产生较好的可调试信息和对语言标准的遵循程度.</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> -g0 不产生 debug 信息</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> -g1 产生极少数 debug 信息</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> -g, -g2 默认的 debug 级别, 产生正常数量的 debug 信息</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> -g3 会生成额外的 debug 信息, 比如说提供宏展开功能</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="导出符号表"><a href="#导出符号表" class="headerlink" title="导出符号表"></a>导出符号表</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">objcopy --only-keep-debug &lt;exec_file&gt; &lt;debug_path&gt;/&lt;symbol_file&gt;</span><br></pre></td></tr></table></figure>
+
+<p>生成的 symbol 文件是只包含 debug 信息的符号表文件。</p>
+<h3 id="清理可执行文件中的符号表"><a href="#清理可执行文件中的符号表" class="headerlink" title="清理可执行文件中的符号表"></a>清理可执行文件中的符号表</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">objcopy --strip-all &lt;exec_file&gt;</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 也可以使用 strip 进行清理</span></span><br><span class="line">strip --strip-debug --strip-unneeded &lt;exec_file&gt;</span><br></pre></td></tr></table></figure>
+
+<p>可以使用 <code>objdump</code> 检查是否真正去除，如果显示无符号表信息则为正常。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">objdump -t &lt;exec_file&gt;</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> objdump - display information from object files.</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> -t | --syms 打印该文件的符号表信息, 类似 nm 程序</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> -T | --dynamic-syms 打印该文件的动态连接符号表信息, 类似 nm -D</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="添加符号表导入地址"><a href="#添加符号表导入地址" class="headerlink" title="添加符号表导入地址"></a>添加符号表导入地址</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">objcopy --add-gnu-debuglink=&lt;debug_path&gt;/&lt;symbol_file&gt; &lt;exec_file&gt;</span><br></pre></td></tr></table></figure>
+
+<p>这一步的目的是给清理之后的可执行文件添加 <code>.gnu_debuglink</code> 的段地址，这个段地址指向 <code>&lt;debug_path&gt;/&lt;symbol_file&gt;</code> 符号表文件，用于加载符号表信息。</p>
+<h2 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h2><p>把导出的符号表文件放入 <code>&lt;debug_path&gt;/&lt;symbol_file&gt;</code> 路径下，再使用 <code>gdb</code> 进行 debug 即可。<code>&lt;debug_path&gt;</code> 可以是相对路径也可以是绝对路径。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 把符号表放到对应路径下</span></span><br><span class="line">mkdir -p &lt;debug_path&gt;</span><br><span class="line">cp &lt;symbol_file&gt; &lt;debug_path&gt;/&lt;symbol_file&gt;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>对运行时的无符号表可执行程序 debug</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 获取 program 的进程号</span></span><br><span class="line">ps -ef | grep &lt;program&gt;</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> pid 是 program 的进程号 </span></span><br><span class="line">gdb -p &lt;pid&gt;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>对无符号表可执行程序生成的 coredump 文件 debug</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gdb -c &lt;coredump_file&gt; -e &lt;exec_file&gt;</span><br></pre></td></tr></table></figure>
+
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">objcopy - copy and translate object files.</span><br><span class="line"></span><br><span class="line">--only-keep-debug</span><br><span class="line">    Strip a file, removing contents of any sections that would not be stripped by --strip-debug and leaving the debugging sections intact. In ELF files, this preserves all note sections in the output.</span><br><span class="line">    </span><br><span class="line">--add-gnu-debuglink</span><br><span class="line">    创建 .gun_debuglink 字段并包含到符号文件的引用添加到目标文件中</span><br></pre></td></tr></table></figure>
+
+<p><a target="_blank" rel="noopener" href="https://linux.die.net/man/1/objcopy">objcopy manual</a></p>
+<p><a target="_blank" rel="noopener" href="https://linux.die.net/man/1/objdump">objdump manual</a></p>
+<p><a target="_blank" rel="noopener" href="https://gcc.gnu.org/onlinedocs/gcc/Optimize-Options.html">gcc 优化参数文档</a></p>
+<p><a target="_blank" rel="noopener" href="https://gcc.gnu.org/onlinedocs/gcc/Debugging-Options.html">gcc Debug 参数文档</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.zhihu.com/question/27090458">GCC中-O1 -O2 -O3 优化的原理是什么？</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/linux/" rel="tag"># linux</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/01/02/ovs-dpdk/" rel="prev" title="OVS-DPDK 编译与使用">
+      <i class="fa fa-chevron-left"></i> OVS-DPDK 编译与使用
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%AF%E6%89%A7%E8%A1%8C%E6%96%87%E4%BB%B6%E5%A4%84%E7%90%86"><span class="nav-number">1.</span> <span class="nav-text">可执行文件处理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%96%E8%AF%91%E6%97%B6%E5%8A%A0%E5%85%A5-debug-%E4%BF%A1%E6%81%AF%E9%80%89%E9%A1%B9"><span class="nav-number">1.1.</span> <span class="nav-text">编译时加入 debug 信息选项</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%BC%E5%87%BA%E7%AC%A6%E5%8F%B7%E8%A1%A8"><span class="nav-number">1.2.</span> <span class="nav-text">导出符号表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B8%85%E7%90%86%E5%8F%AF%E6%89%A7%E8%A1%8C%E6%96%87%E4%BB%B6%E4%B8%AD%E7%9A%84%E7%AC%A6%E5%8F%B7%E8%A1%A8"><span class="nav-number">1.3.</span> <span class="nav-text">清理可执行文件中的符号表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B7%BB%E5%8A%A0%E7%AC%A6%E5%8F%B7%E8%A1%A8%E5%AF%BC%E5%85%A5%E5%9C%B0%E5%9D%80"><span class="nav-number">1.4.</span> <span class="nav-text">添加符号表导入地址</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8"><span class="nav-number">2.</span> <span class="nav-text">使用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">3.</span> <span class="nav-text">参考</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">John Doe</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">12</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">tags</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

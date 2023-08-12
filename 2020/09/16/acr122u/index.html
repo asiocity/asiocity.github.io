@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"example.com","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.18.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="acr122u 使用记录">
+<meta property="og:type" content="article">
+<meta property="og:title" content="acr122u 使用">
+<meta property="og:url" content="http://example.com/2020/09/16/acr122u/index.html">
+<meta property="og:site_name" content="collia&#39;s blog">
+<meta property="og:description" content="acr122u 使用记录">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-09-16T14:42:00.000Z">
+<meta property="article:modified_time" content="2023-08-12T07:41:20.763Z">
+<meta property="article:author" content="collia">
+<meta property="article:tag" content="archlinux">
+<meta property="article:tag" content="acr122u">
+<meta property="article:tag" content="nfc">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://example.com/2020/09/16/acr122u/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://example.com/2020/09/16/acr122u/","path":"2020/09/16/acr122u/","title":"acr122u 使用"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>acr122u 使用 | collia's blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">collia's blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8"><span class="nav-number">2.</span> <span class="nav-text">使用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85%E9%A9%B1%E5%8A%A8"><span class="nav-number">2.1.</span> <span class="nav-text">安装驱动</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A0%B4%E8%A7%A3"><span class="nav-number">2.2.</span> <span class="nav-text">破解</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Dump-%E6%95%B0%E6%8D%AE"><span class="nav-number">2.2.1.</span> <span class="nav-text">Dump 数据</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%8A%A0%E5%AF%86%E5%A4%84%E7%90%86"><span class="nav-number">2.2.1.1.</span> <span class="nav-text">加密处理</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%86%99%E5%8D%A1"><span class="nav-number">2.2.2.</span> <span class="nav-text">写卡</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%99%AE%E9%80%9A-Mifare-%E5%8D%A1"><span class="nav-number">2.2.2.1.</span> <span class="nav-text">普通 Mifare 卡</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#UID-Mifare"><span class="nav-number">2.2.2.2.</span> <span class="nav-text">UID Mifare</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#CUID-Mifare"><span class="nav-number">2.2.2.3.</span> <span class="nav-text">CUID Mifare</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#FUID-FCUID"><span class="nav-number">2.2.2.4.</span> <span class="nav-text">FUID&#x2F;FCUID</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">3.</span> <span class="nav-text">参考</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">collia</p>
+  <div class="site-description" itemprop="description">recording</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">15</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/09/16/acr122u/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="collia">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="collia's blog">
+      <meta itemprop="description" content="recording">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="acr122u 使用 | collia's blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          acr122u 使用
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-09-16 22:42:00" itemprop="dateCreated datePublished" datetime="2020-09-16T22:42:00+08:00">2020-09-16</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-08-12 15:41:20" itemprop="dateModified" datetime="2023-08-12T15:41:20+08:00">2023-08-12</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>acr122u 使用记录</p>
+<span id="more"></span>
+
+<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>acr122u其实是大学时候买来做实验(咳咳)用的，自从小米6上买了<a target="_blank" rel="noopener" href="https://play.google.com/store/apps/details?id=com.yuanwofei.cardemulator.pro&hl=en_US">Card Emulator Pro</a>之后，因为这软件也有对m1卡的复制uuid和写白卡功能，这个读卡器就丢到一边吃灰去了。</p>
+<p>最近同事给了我几张白卡叫我帮他复制下自家的门卡，发现前几日刷了LineageOS 17.1之后手机对m1卡的模拟功能还是正常的，但不能写入白卡了，遂又把丢在一边的机器翻了出来。</p>
+<h2 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h2><h3 id="安装驱动"><a href="#安装驱动" class="headerlink" title="安装驱动"></a>安装驱动</h3><p>本人使用 Arch Linux 其他操作系统可以参考大致步骤和命令</p>
+<p>安装 pcsc-lite。pcsc-lite 封装了访问使用 SCard API (PC&#x2F;SC) 访问智能卡设备的开发包。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pacman -S pcsc-lite libusb </span><br></pre></td></tr></table></figure>
+
+<p>安装 acr122u 的驱动，有两种方式，对于 Arch Linux 来说 acsccid 驱动已经提交到了 community 仓库中，可以直接使用 pacman 来安装。同时也可以使用官网下载的驱动手动编译安装。</p>
+<ul>
+<li><p>使用仓库</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pacman -S acsccid</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>手动编译驱动</p>
+<p>去<a target="_blank" rel="noopener" href="https://www.acs.com.hk/en/driver/3/acr122u-usb-nfc-reader/">acs官网</a>下载 acr122u 的驱动。</p>
+<p>编译前需要确保系统编译环境</p>
+<ul>
+<li>pcsclite 1.8.3 or above</li>
+<li>libusb 1.0.9 or above</li>
+<li>flex</li>
+<li>perl</li>
+<li>pkg-config</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">unar ACS-Unified-Driver-Lnx-Mac-xyj-P.zip</span><br><span class="line">cd ACS-Unified-Driver-Lnx-Mac-118-P</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">Enter the following commands to unpack the driver <span class="built_in">source</span> code.</span></span><br><span class="line">tar -jxvf acsccid-x.y.z.tar.bz2</span><br><span class="line">cd acsccid-x.y.z</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">Enter the following commands to install the driver.</span></span><br><span class="line">./configure</span><br><span class="line">make</span><br><span class="line">make install</span><br></pre></td></tr></table></figure></li>
+</ul>
+<p>安装 libtool 和 libnfc</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pacman -S libtool libnfc</span><br></pre></td></tr></table></figure>
+
+<p>禁用部分模块，根据 <a target="_blank" rel="noopener" href="https://wiki.archlinux.org/index.php/Touchatag_RFID_Reader">Wiki</a> 说明，内核会自动加载的pn533驱动会导致驱动报错无法识别到nfc设备。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看内核是否加载了 pn533 模块</span></span><br><span class="line">lsmod | grep pn533</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">禁用模块</span></span><br><span class="line">modprobe -r pn533_usb pn533 nfc</span><br><span class="line">echo &quot;blacklist pn533_usb&quot; &gt;&gt; /etc/modprobe.d/blacklist-libnfc.conf</span><br><span class="line">echo &quot;blacklist pn533&quot; &gt;&gt; /etc/modprobe.d/blacklist-libnfc.conf</span><br><span class="line">echo &quot;blacklist nfc&quot; &gt;&gt; /etc/modprobe.d/blacklist-libnfc.conf</span><br></pre></td></tr></table></figure>
+
+<p>这时，一般来说我们的系统就可以使用 acr122u 了。</p>
+<p>可以使用 <code>nfc-list</code> 查看读卡器的状态。</p>
+<p>但是在我的环境下依旧是有问题，无法识别到 acr122u。解决方法是插着 acr122u 进行重启。重启后就可以正常使用读卡器了，注意此时不能把 acr122u 拔下，拔下后再插上依旧会变回无法识别读卡器的状态。</p>
+<h3 id="破解"><a href="#破解" class="headerlink" title="破解"></a>破解</h3><h4 id="Dump-数据"><a href="#Dump-数据" class="headerlink" title="Dump 数据"></a>Dump 数据</h4><p>尝试使用 mfoc 进行 dump 数据，<a target="_blank" rel="noopener" href="https://github.com/nfc-tools/mfoc.git">mfoc</a>(Mifare Classic Offline Cracker)是一款离线的认证嵌套攻击工具。可以使用仓库进行安装</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">pacman -S mfoc</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">安装修改版 mfcuk 软件，支持对国产加强卡的暴力破解</span></span><br><span class="line">git clone https://github.com/DrSchottky/mfcuk</span><br><span class="line">cd mfcuk</span><br><span class="line">automake &amp;&amp; autoconf &amp;&amp; ./configure &amp;&amp; make install</span><br></pre></td></tr></table></figure>
+
+<p>具体使用方法可以查看mfoc的帮助文档。</p>
+<p>我们可以使用 mfoc dump 原有卡中的数据，把每个 sector 的 probes 调高一点到 500，默认为 20，这样速度可以快很多，输出文件为 output.mfd。</p>
+<p>MFOC 会先尝试默认密钥，如果匹配则进行认证嵌套攻击。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mfoc -P 500 -O output.mfd</span><br></pre></td></tr></table></figure>
+
+<p>可能出现的情况分以下三种：</p>
+<ul>
+<li><p>卡片没有任何一个扇区使用默认密钥。此时应考虑使用 <code>mfcuk</code> 工具至少找出一个密钥，再使用 <code>mfoc</code> 工具进行破解；</p>
+</li>
+<li><p>卡片有至少一个扇区使用了默认密钥。此时 <code>mfoc</code> 可以使用嵌套认证漏洞，花费大概 10-20 分钟左右的时间将所有密钥推出，然后再将卡导出到指定文件。</p>
+</li>
+<li><p>卡片全部扇区都使用了默认密钥。此时 <code>mfoc</code> 可以直接将卡导出到指定文件。</p>
+</li>
+</ul>
+<h5 id="加密处理"><a href="#加密处理" class="headerlink" title="加密处理"></a>加密处理</h5><p>如果出现第一种情况，我们需要使用 <code>mfcuk</code> 工具对卡片进行 Darkside 攻击，破解出至少一个可用的密钥，再使用 <code>mfoc</code> 工具提供的嵌套认证漏洞利用来读出整卡。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">mfcuk -C -R 0 -s 500 -S 500 -v 2 -w 5</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">-C      --- 破解模式。</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">-R 0    --- 破解 0 号扇区的密钥。</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">-s 500</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">-S 500  --- 关闭电磁场和开启电磁场的时间间隔。使用 PN532 破解的用户可以无视。</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">            但对 ACR122U 来说，默认的 10ms 和 50ms 太快了，成功率很低。</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">-v 2    --- 多显示一些信息。</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">-w 5    --- treshold。防止 NACK 卡爆程序。</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>特别注意的是，虽然 AUR 上有现成的 <code>mfcuk-git</code> 仓库，但是官方代码对一个严重的问题并没有进行解决：对于一些较新的 Mifare 卡，这些卡在认证失败的时候会直接发送 NACK，导致原有的工具失效并频繁爆出 <code>mfcuk: ERROR: mfcuk_key_recovery_block() (error code=0x03)</code> 错误，详情可以原仓库 <a target="_blank" rel="noopener" href="https://github.com/nfc-tools/mfcuk/issues/28#issuecomment-319766380">Issue #28</a>。</p>
+<p>而 DrSchhottky 的<a target="_blank" rel="noopener" href="https://github.com/DrSchottky/mfcuk">Fork 版本</a>通过引入 treshold 选项解决了这一问题。只需要在运行 <code>mfcuk</code> 时指定 <code>-w</code> 选项设置一个 treshold，例如 <code>-w 5</code>，类似的问题就不会再出现。这也是为什么我要推荐使用他的版本的原因。</p>
+</blockquote>
+<p>等待大约 30-50 分钟，我们可以至少拿到 1 个可用的密钥。接下来，我们把拿到的密钥，例如 <code>ffeeccaabbee</code> 传递给 <code>mfoc</code>，把破解的任务转交给他来完成。在之前的 <code>mfoc</code> 参数列表中补充一个 <code>-k &lt;密钥&gt;</code>，即可指定使用某些密钥来进行嵌套认证漏洞攻击。成功之后，我们依然可以读出整卡到文件。</p>
+<h4 id="写卡"><a href="#写卡" class="headerlink" title="写卡"></a>写卡</h4><p>写卡基本是通过<a target="_blank" rel="noopener" href="https://www.mankier.com/1/nfc-mfclassic">nfc-mfclassic</a>(MIFARE Classic command line tool)来进行写入，但是对不同类型的 Mifare 卡有不同的写入方式。</p>
+<p>目前市面上能见到的 Mifare 卡一共有 5 种类型：</p>
+<ol>
+<li>普通 Mifare 卡。这种卡的 0 扇区是不可写的，所以对于要复制卡片的人来说，这种卡可能并不适用。大多见于被攻击的原卡，不过对于原卡来说，即使不能进行写入，也可以修改其他扇区的数据。</li>
+<li>UID Mifare 卡。这种卡通过响应后门指令来实现所有扇区的可写，可以直接绕过密钥验证读取、擦出、写入任意扇区。对于需要复制卡片的人来说这种卡片简直是福音，但事实上恰恰有些系统会去验证卡片是否响应后门指令。这样的话，轻则拒绝访问，重则当场报警，慎之慎之。</li>
+<li>CUID Mifare 卡。这种卡的所有扇区都是可写的，但是并不响应后门指令。这种卡片由于不响应后门指令，可以绕过一些防火墙系统的设计。但是有些变态的防火墙系统会尝试对 0 扇区进行写入以进行测试，这时轻则卡片写废、拒绝访问，重则当场完犊子，同样要小心。</li>
+<li>FUID Mifare 卡。这种卡是一种经过改良的 UID 卡，不同的是卡片多出了一个烧死的特殊指令。一旦使用特殊的工具执行了烧死这一指令，卡片就从 UID 卡变回普通的 Mifare 卡。这种卡片连防火墙都拿他没辄，不过缺点是只能用一次，而且太贵了。</li>
+<li>FCUID Mifare 卡。与 FUID Mifare 卡类似，基于 CUID 卡，不再赘述。</li>
+</ol>
+<p>这些卡片的价格按照叙述顺序递增，写卡难度也按照叙述顺序递增。</p>
+<h5 id="普通-Mifare-卡"><a href="#普通-Mifare-卡" class="headerlink" title="普通 Mifare 卡"></a>普通 Mifare 卡</h5><p>写入普通 Mifare 卡需要用到之前读出的整卡文件。其实文件里有用的部分仅仅是密钥，卡片本身只要密钥没变过，使用过期的文件同样可以对卡片进行读写。执行以下命令来将一个文件写进卡里：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">nfc-mfclassic w a u newdata.mfd olddata.mfd</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">newdata.mfd --- 新文件</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">olddata.mfd --- 老文件（使用密钥）</span></span><br></pre></td></tr></table></figure>
+
+<p>这样将会更新 Mifare 卡除第 0 扇区外的其他扇区。</p>
+<h5 id="UID-Mifare"><a href="#UID-Mifare" class="headerlink" title="UID Mifare"></a>UID Mifare</h5><p>写入 UID 卡不需要使用之前读出的整卡文件（你甚至不用先破解），因为 <code>nfc-mfclassic</code> 工具支持 UID 卡的 <code>unlocked write</code> 模式，能够直接使用后门指令把数据导入卡内。执行以下命令来把一个文件写入 UID 卡内：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">nfc-mfclassic W a u newdata.mfd</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">W --- unlocked write 模式，UID 卡支持。</span></span><br></pre></td></tr></table></figure>
+
+<p>这样将会更新 UID Mifare 卡包括 0 扇区在内的所有扇区。</p>
+<h5 id="CUID-Mifare"><a href="#CUID-Mifare" class="headerlink" title="CUID Mifare"></a>CUID Mifare</h5><p>很遗憾，<code>nfc-mfclassic</code> 不支持直接将整个文件写入 CUID 卡。因为 <code>nfc-mfclassic</code> 工具写入 0 扇区只能使用 <code>unlocked write</code> 模式，这恰恰避开了 CUID 卡的特性——不支持后门指令。我们可以使用 <code>nfc-mfclassic</code> 工具写卡之后，用第三方工具再将 0 扇区的数据进行写入。</p>
+<blockquote>
+<p>  在实际验证中，我使用 Proxmark3 成功地写入了 CUID 卡的 0 扇区。当然，在写入之前，你还需要通过 Mifare 卡的正常验证。我也使用 <code>libnfc</code> 配合 C++ 程序实现了一个简单的 CUID 工具，用于自动在写入之前将 CUID 卡的 0 扇区进行妥善处理。感兴趣的读者也可一试。</p>
+</blockquote>
+<h5 id="FUID-FCUID"><a href="#FUID-FCUID" class="headerlink" title="FUID&#x2F;FCUID"></a>FUID&#x2F;FCUID</h5><p>这些卡片需要特殊的指令才能进行。略。</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a target="_blank" rel="noopener" href="https://www.ducksoft.site/%E5%AE%89%E5%85%A8/mifare-crack-guide.html">在 Arch Linux 下攻击 Mifare NFC 卡片的简明指南</a></p>
+<p><a target="_blank" rel="noopener" href="https://gorgias.me/2016/10/25/Arch-Linux%E4%B8%8A%E4%BD%BF%E7%94%A8ACR122U%E7%A0%B4%E8%A7%A3%E9%B2%9C%E5%A5%B6%E5%8D%A1/">Arch Linux上使用ACR122U破解鲜奶卡</a></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/archlinux/" rel="tag"># archlinux</a>
+              <a href="/tags/acr122u/" rel="tag"># acr122u</a>
+              <a href="/tags/nfc/" rel="tag"># nfc</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2020/06/20/sriov-on-centos/" rel="prev" title="在 CentOS 上使用 SRIOV">
+                  <i class="fa fa-angle-left"></i> 在 CentOS 上使用 SRIOV
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2020/09/20/f-stack-usage/" rel="next" title="F-STACK 编译安装与使用">
+                  F-STACK 编译安装与使用 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2023</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">collia</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

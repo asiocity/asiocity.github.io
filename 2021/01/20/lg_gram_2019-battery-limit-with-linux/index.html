@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"example.com","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.18.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="前几年买了 LG Gram 2018 版, 因为据说有 Linux 内核开发的 Contributer 也买了并提供了相关的驱动, 用起来还是非常巴适的. 结果好景不长, 因为做工因素返厂了, 然后京东就给我换了一台新的 2019 版 LG 的做工是真的不行, 2019 后来其实又返厂过了, 顺便京东的售后真的好顶赞, 结果原来可以使用的电池充电控制功能废了. 一开始也并不是很在意就没管, 前段时">
+<meta property="og:type" content="article">
+<meta property="og:title" content="控制 LG Gram 2019 版在 Linux 下的充电程度">
+<meta property="og:url" content="http://example.com/2021/01/20/lg_gram_2019-battery-limit-with-linux/index.html">
+<meta property="og:site_name" content="collia&#39;s blog">
+<meta property="og:description" content="前几年买了 LG Gram 2018 版, 因为据说有 Linux 内核开发的 Contributer 也买了并提供了相关的驱动, 用起来还是非常巴适的. 结果好景不长, 因为做工因素返厂了, 然后京东就给我换了一台新的 2019 版 LG 的做工是真的不行, 2019 后来其实又返厂过了, 顺便京东的售后真的好顶赞, 结果原来可以使用的电池充电控制功能废了. 一开始也并不是很在意就没管, 前段时">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-01-20T09:26:00.000Z">
+<meta property="article:modified_time" content="2023-08-12T07:41:20.763Z">
+<meta property="article:author" content="collia">
+<meta property="article:tag" content="archlinux">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://example.com/2021/01/20/lg_gram_2019-battery-limit-with-linux/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://example.com/2021/01/20/lg_gram_2019-battery-limit-with-linux/","path":"2021/01/20/lg_gram_2019-battery-limit-with-linux/","title":"控制 LG Gram 2019 版在 Linux 下的充电程度"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>控制 LG Gram 2019 版在 Linux 下的充电程度 | collia's blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">collia's blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-overview-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">collia</p>
+  <div class="site-description" itemprop="description">recording</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">15</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/01/20/lg_gram_2019-battery-limit-with-linux/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="collia">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="collia's blog">
+      <meta itemprop="description" content="recording">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="控制 LG Gram 2019 版在 Linux 下的充电程度 | collia's blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          控制 LG Gram 2019 版在 Linux 下的充电程度
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-01-20 17:26:00" itemprop="dateCreated datePublished" datetime="2021-01-20T17:26:00+08:00">2021-01-20</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-08-12 15:41:20" itemprop="dateModified" datetime="2023-08-12T15:41:20+08:00">2023-08-12</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>前几年买了 LG Gram 2018 版, 因为据说有 Linux 内核开发的 Contributer 也买了并提供了相关的驱动, 用起来还是非常巴适的. 结果好景不长, 因为做工因素返厂了, 然后京东就给我换了一台新的 2019 版 <del>LG 的做工是真的不行, 2019 后来其实又返厂过了, 顺便京东的售后真的好顶赞</del>, 结果原来可以使用的电池充电控制功能废了.</p>
+<p>一开始也并不是很在意就没管, 前段时间刷了下 <a target="_blank" rel="noopener" href="https://www.reddit.com/r/linuxhardware/comments/dlhw1y/limit_battery_charge_in_lg_gram_2019_laptop/">Reddit</a> , 发现已经有大佬自己修改并提供了相关的<a target="_blank" rel="noopener" href="https://drive.google.com/file/d/1Ba1VKnVEMJSa62vb1_gUa1t80bWl1SeX/view?usp=drivesdk">补丁</a>, 就下来刷了下发现确实可以用了.</p>
+<span id="more"></span>
+
+<p>下面说下用法, 以 archlinux 为例:</p>
+<ol>
+<li><p>安装 linux-header、gcc、make, 这些是编译这个驱动必要的依赖:</p>
+ <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yay -S linux-headers gcc make</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>解压下载来的压缩包, 进行编译:</p>
+ <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">make -j 4</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>进行安装, 需要 root 权限:</p>
+ <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo make install</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>手动挂载:</p>
+ <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo rmmod lg-laptop</span><br><span class="line">sudo insmod /usr/lib/modules/`uname -r`/extra/drivers/platform/x86/lg-laptop.ko</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>进行限制:</p>
+ <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">echo &quot;80&quot; &gt; /sys/devices/platform/lg-laptop/battery_care_limit</span><br></pre></td></tr></table></figure></li>
+</ol>
+<p>这样就成功了, 唯一的问题是重启和更新内核版本后功能失效.</p>
+<p>鉴于个人使用习惯, 关机还是蛮频繁的, 因此写了个自动挂载启动脚本:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[Unit]</span><br><span class="line">Description=Set lg-laptop battery charge limit</span><br><span class="line"></span><br><span class="line">[Service]</span><br><span class="line">Type=oneshot</span><br><span class="line">ExecStart=/usr/bin/bash -c &#x27;rmmod lg-laptop &amp;&amp; insmod /usr/lib/modules/`uname -r`/extra/drivers/platform/x86/lg-laptop.ko &amp;&amp; /usr/bin/echo &quot;80&quot; &gt; /sys/devices/platform/lg-laptop/battery_care_limit&#x27;</span><br><span class="line"></span><br><span class="line">[Install]</span><br><span class="line">WantedBy=multi-user.target</span><br></pre></td></tr></table></figure>
+
+<p>把以上内容放到 <code>/etc/systemd/system/battery-limit.service</code> 中, 并使用 <code>systemctl enable battery-limit</code> 激活开机启动功能就好.</p>
+<p>ArchLinux 好像是支持安装特定软件时使用 PostInstall Hook, 哪天有空看看写个跟随系统内核自动编译的脚本好了.</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/archlinux/" rel="tag"># archlinux</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/01/02/binary-symbols-with-debug/" rel="prev" title="可执行文件符号表导出与使用">
+                  <i class="fa fa-angle-left"></i> 可执行文件符号表导出与使用
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/02/19/redis-ae/" rel="next" title="Redis 源码学习 - ae 服务器模块">
+                  Redis 源码学习 - ae 服务器模块 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2023</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">collia</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

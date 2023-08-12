@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"example.com","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.18.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="CentOS 下 sriov 环境配置笔记.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="在 CentOS 上使用 SRIOV">
+<meta property="og:url" content="http://example.com/2020/06/20/sriov-on-centos/index.html">
+<meta property="og:site_name" content="collia&#39;s blog">
+<meta property="og:description" content="CentOS 下 sriov 环境配置笔记.">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-06-20T06:59:00.000Z">
+<meta property="article:modified_time" content="2023-08-12T07:41:20.763Z">
+<meta property="article:author" content="collia">
+<meta property="article:tag" content="sriov">
+<meta property="article:tag" content="centos">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://example.com/2020/06/20/sriov-on-centos/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://example.com/2020/06/20/sriov-on-centos/","path":"2020/06/20/sriov-on-centos/","title":"在 CentOS 上使用 SRIOV"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>在 CentOS 上使用 SRIOV | collia's blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">collia's blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#0x00-%E6%A3%80%E6%9F%A5%E5%9F%BA%E7%A1%80%E7%8E%AF%E5%A2%83"><span class="nav-number">1.</span> <span class="nav-text">0x00 检查基础环境</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x01-%E5%BC%80%E5%90%AF-SR-IOV"><span class="nav-number">2.</span> <span class="nav-text">0x01 开启 SR-IOV</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E5%BC%80%E5%90%AF-IOMMUO-%E5%8A%9F%E8%83%BD"><span class="nav-number">2.1.</span> <span class="nav-text">1. 开启 IOMMUO 功能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E5%BC%80%E5%90%AF-Virtual-Function"><span class="nav-number">2.2.</span> <span class="nav-text">2. 开启 Virtual Function</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x02-%E9%85%8D%E7%BD%AE-Virtual-Function"><span class="nav-number">3.</span> <span class="nav-text">0x02 配置 Virtual Function</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x03-Flow-Director-%E9%85%8D%E7%BD%AE"><span class="nav-number">4.</span> <span class="nav-text">0x03 Flow Director 配置</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">collia</p>
+  <div class="site-description" itemprop="description">recording</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">15</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/06/20/sriov-on-centos/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="collia">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="collia's blog">
+      <meta itemprop="description" content="recording">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="在 CentOS 上使用 SRIOV | collia's blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          在 CentOS 上使用 SRIOV
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-06-20 14:59:00" itemprop="dateCreated datePublished" datetime="2020-06-20T14:59:00+08:00">2020-06-20</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-08-12 15:41:20" itemprop="dateModified" datetime="2023-08-12T15:41:20+08:00">2023-08-12</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>CentOS 下 sriov 环境配置笔记.</p>
+<span id="more"></span>
+
+<h2 id="0x00-检查基础环境"><a href="#0x00-检查基础环境" class="headerlink" title="0x00 检查基础环境"></a>0x00 检查基础环境</h2><p>查看 BIOS 是否支持 VT-d 功能，如支持的话开启相关的功能。</p>
+<p>查看物理网卡是否支持 SR-IOV:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">lspci -vv</span><br><span class="line"></span><br><span class="line">...</span><br><span class="line">Initial VFs: 64, Total VFs: 64, Number of VFs: 0, Function Dependency Link: 00</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>可以尝试保存成文本并搜索 SR-IOV 关键字，如果有表示网卡支持 SR-IOV 功能，同时 Total VFs: 64 表示该 PF 最多支持 64 个 VF。</p>
+<h2 id="0x01-开启-SR-IOV"><a href="#0x01-开启-SR-IOV" class="headerlink" title="0x01 开启 SR-IOV"></a>0x01 开启 SR-IOV</h2><h3 id="1-开启-IOMMUO-功能"><a href="#1-开启-IOMMUO-功能" class="headerlink" title="1. 开启 IOMMUO 功能"></a>1. 开启 IOMMUO 功能</h3><blockquote>
+<p>   开启 SR-IOV 会导致 DPDK 的 igb_uio 和 kni 无法使用. 强行使用 igb_uio dpdk eal 初始化会显示因网卡可使用队列为 0 无法初始化, kni 端口则不会出现在 ip addr 列表中.</p>
+</blockquote>
+<p>在 <code>/etc/default/grub</code> 文件最后加上参数, 不同品牌的 CPU 所需的内核参数并不同:</p>
+<ul>
+<li>对于 Intel CPU(VT-d), 使用 <code>intel_iommu=on</code></li>
+<li>对于 AMD CPU(AMD-Vi), 使用 <code>amd_iommu=on</code></li>
+</ul>
+<p>同时需要设置<code>iommu=pt</code>, 这将防止Linux试图接触(touching)无法直通的设备:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">GRUB_TIMEOUT=5</span><br><span class="line">GRUB_DISTRIBUTOR=&quot;$(sed &#x27;s, release .*$,,g&#x27; /etc/system-release)&quot;</span><br><span class="line">GRUB_DEFAULT=saved</span><br><span class="line">GRUB_DISABLE_SUBMENU=true</span><br><span class="line">GRUB_TERMINAL_OUTPUT=&quot;console&quot;</span><br><span class="line">GRUB_CMDLINE_LINUX=&quot;crashkernel=auto rd.lvm.lv=centos/root rd.lvm.lv=centos/swap rhgb quiet intel_iommu=on iommu=pt&quot;</span><br><span class="line">GRUB_DISABLE_RECOVERY=&quot;true&quot;</span><br></pre></td></tr></table></figure>
+
+<p>重新生成 <code>grub.cfg</code></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">备份</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">如果是 BIOS</span></span><br><span class="line">cp /boot/grub2/grub.cfg /boot/grub2/grub.cfg.bak</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">如果是 UEFI</span></span><br><span class="line">cp /boot/efi/EFI/centos/grub.cfg /boot/efi/EFI/centosgrub.cfg.bak</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">重新生成配置 BIOS</span></span><br><span class="line">grub2-mkconfig -o /boot/grub2/grub.cfg</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">重新生成配置 UEFI</span></span><br><span class="line">grub2-mkconfig -o /boot/efi/EFI/centos/grub.cfg</span><br></pre></td></tr></table></figure>
+
+<p>确认 IOMMU 功能确实打开</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">dmesg | grep -e DMAR -e IOMMU</span><br><span class="line"></span><br><span class="line">...</span><br><span class="line">DMAR: IOMMU enabled</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-开启-Virtual-Function"><a href="#2-开启-Virtual-Function" class="headerlink" title="2. 开启 Virtual Function"></a>2. 开启 Virtual Function</h3><p>确认网卡的驱动:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">ethtool -i enp24s0f0</span><br><span class="line"></span><br><span class="line">...</span><br><span class="line">driver: ixgbe</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>有三种方式开启 Virtual Function:</p>
+<ol>
+<li>创建或修改驱动配置文件</li>
+</ol>
+<p>增加 vfs 相关的配置。如在 &#x2F;etc&#x2F;modprobe.d&#x2F;ixgbe.conf 中添加:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">options ixgbe max_vfs=2</span><br></pre></td></tr></table></figure>
+
+<p>重新生成配置后重启系统生效.</p>
+<ol start="2">
+<li>修改 &#x2F;etc&#x2F;default&#x2F;grub</li>
+</ol>
+<p>如在最后添加相关配置:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">GRUB_TIMEOUT=5</span><br><span class="line">GRUB_DISTRIBUTOR=&quot;$(sed &#x27;s, release .*$,,g&#x27; /etc/system-release)&quot;</span><br><span class="line">GRUB_DEFAULT=saved</span><br><span class="line">GRUB_DISABLE_SUBMENU=true</span><br><span class="line">GRUB_TERMINAL_OUTPUT=&quot;console&quot;</span><br><span class="line">GRUB_CMDLINE_LINUX=&quot;crashkernel=auto rd.lvm.lv=centos/root rd.lvm.lv=centos/swap rhgb quiet intel_iommu=on iommu=pt ixgbe.max_vfs=2&quot;</span><br><span class="line">GRUB_DISABLE_RECOVERY=&quot;true&quot;</span><br></pre></td></tr></table></figure>
+
+<p>重新生成配置后重启系统生效.</p>
+<ol start="3">
+<li>临时启用</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">echo 2 | tee /sys/bus/pci/devices/0000:18:00.0/sriov_numvfs</span><br></pre></td></tr></table></figure>
+
+<p>检查:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">lspci -vv  | grep 82599</span><br><span class="line"></span><br><span class="line">18:00.0 Ethernet controller: Intel Corporation 82599ES 10-Gigabit SFI/SFP+ Network Connection (rev 01)</span><br><span class="line">18:00.1 Ethernet controller: Intel Corporation 82599ES 10-Gigabit SFI/SFP+ Network Connection (rev 01)</span><br><span class="line">18:10.0 Ethernet controller: Intel Corporation 82599 Ethernet Controller Virtual Function (rev 01)</span><br><span class="line">18:10.2 Ethernet controller: Intel Corporation 82599 Ethernet Controller Virtual Function (rev 01)</span><br></pre></td></tr></table></figure>
+
+<h2 id="0x02-配置-Virtual-Function"><a href="#0x02-配置-Virtual-Function" class="headerlink" title="0x02 配置 Virtual Function"></a>0x02 配置 Virtual Function</h2><p>查看 VF 的 MAC 地址:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">ip link show</span><br><span class="line">...</span><br><span class="line">	2: enp130s0f0: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc mq master br0 state UP mode DEFAULT qlen 1000</span><br><span class="line">	    link/ether 00:1b:21:ba:99:a4 brd ff:ff:ff:ff:ff:ff</span><br><span class="line">	    vf 0 MAC 00:00:00:00:00:00, spoof checking on, link-state auto, trust off</span><br><span class="line">	    vf 1 MAC 00:00:00:00:00:00, spoof checking on, link-state auto, trust off</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>给 VF 配置默认 MAC 地址, 之后的 virtio 的 mac 地址需要和这里设置的地址一样:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip link set &lt;pf_name&gt; vf &lt;vf_num&gt; mac &lt;mac_address&gt;</span><br></pre></td></tr></table></figure>
+
+<p>给 VF 开启组播允许功能:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip link set &lt;pf_name&gt; vf &lt;vf_num&gt; trust on</span><br></pre></td></tr></table></figure>
+
+<h2 id="0x03-Flow-Director-配置"><a href="#0x03-Flow-Director-配置" class="headerlink" title="0x03 Flow Director 配置"></a>0x03 Flow Director 配置</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">配置 FDir 规则</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">根据访问目的 ip</span></span><br><span class="line">ethtool -N &lt;PORT_NAME&gt; flow-type tcp4 src-ip $sipass_addr action $queue_index_in_VFn</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">根据访问目的 ip 和目的 port</span></span><br><span class="line">ethtool -N &lt;PORT_NAME&gt; flow-type tcp4 src-ip $sipass_addr dst-port $sipass_port action $queue_index_in_VFn</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看规则</span></span><br><span class="line">ethtool -n &lt;PORT_NAME&gt;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">删除规则</span></span><br><span class="line">ethtool -N &lt;PORT_NAME&gt; delete &lt;RULE_NUM&gt;</span><br></pre></td></tr></table></figure>
+
+<p>其中 <code>$queue_index_in_VFn</code>: </p>
+<ul>
+<li>39:32 位代表 VF id + 1</li>
+<li>低 32 位代表 VF 的队列号</li>
+</ul>
+<p>因此 <code>$queue_index_in_VFn = (0xn &amp; 0xFF) &lt;&lt; 32 + [queue index]</code>.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">63    40 | 39   30 | 31        0</span><br><span class="line">0x000000 | VF_ID+1 | QUEUE_INDEX</span><br></pre></td></tr></table></figure>
+
+<p>参考:</p>
+<p><a target="_blank" rel="noopener" href="https://software.intel.com/content/www/us/en/develop/articles/setting-up-intel-ethernet-flow-director.html">intel 技术支持</a></p>
+<p><a target="_blank" rel="noopener" href="https://doc.dpdk.org/guides-18.11/howto/flow_bifurcation.html">DPDK 文档</a></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/sriov/" rel="tag"># sriov</a>
+              <a href="/tags/centos/" rel="tag"># centos</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2020/06/11/dpdk-usage/" rel="prev" title="DPDK 编译安装与使用">
+                  <i class="fa fa-angle-left"></i> DPDK 编译安装与使用
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2020/09/16/acr122u/" rel="next" title="acr122u 使用">
+                  acr122u 使用 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2023</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">collia</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

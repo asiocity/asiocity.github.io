@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"example.com","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.18.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="qemu 手动搭建记录">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用 Qemu 搭建 aarch64 虚拟机">
+<meta property="og:url" content="http://example.com/2020/09/27/build_aarch64_vm_with_qemu/index.html">
+<meta property="og:site_name" content="collia&#39;s blog">
+<meta property="og:description" content="qemu 手动搭建记录">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-09-27T11:54:00.000Z">
+<meta property="article:modified_time" content="2023-08-12T07:41:20.763Z">
+<meta property="article:author" content="collia">
+<meta property="article:tag" content="sriov">
+<meta property="article:tag" content="centos">
+<meta property="article:tag" content="qemu">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://example.com/2020/09/27/build_aarch64_vm_with_qemu/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://example.com/2020/09/27/build_aarch64_vm_with_qemu/","path":"2020/09/27/build_aarch64_vm_with_qemu/","title":"使用 Qemu 搭建 aarch64 虚拟机"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>使用 Qemu 搭建 aarch64 虚拟机 | collia's blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">collia's blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85qemu"><span class="nav-number">1.</span> <span class="nav-text">安装qemu</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%99%9A%E6%8B%9F%E6%9C%BA%E9%95%9C%E5%83%8F%E9%83%A8%E7%BD%B2"><span class="nav-number">2.</span> <span class="nav-text">虚拟机镜像部署</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE"><span class="nav-number">3.</span> <span class="nav-text">虚拟机网络配置</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#NAT"><span class="nav-number">3.1.</span> <span class="nav-text">NAT</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A1%A5%E6%8E%A5"><span class="nav-number">3.2.</span> <span class="nav-text">桥接</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SR-IOV"><span class="nav-number">3.3.</span> <span class="nav-text">SR-IOV</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%87%86%E5%A4%87-SR-IOV-%E7%8E%AF%E5%A2%83"><span class="nav-number">3.3.1.</span> <span class="nav-text">准备 SR-IOV 环境</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BB%99%E8%AE%BE%E5%A4%87%E6%8C%82%E8%BD%BD-vfio-%E9%A9%B1%E5%8A%A8"><span class="nav-number">3.3.2.</span> <span class="nav-text">给设备挂载 vfio 驱动</span></a></li></ol></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">collia</p>
+  <div class="site-description" itemprop="description">recording</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">15</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/09/27/build_aarch64_vm_with_qemu/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="collia">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="collia's blog">
+      <meta itemprop="description" content="recording">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="使用 Qemu 搭建 aarch64 虚拟机 | collia's blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          使用 Qemu 搭建 aarch64 虚拟机
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-09-27 19:54:00" itemprop="dateCreated datePublished" datetime="2020-09-27T19:54:00+08:00">2020-09-27</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-08-12 15:41:20" itemprop="dateModified" datetime="2023-08-12T15:41:20+08:00">2023-08-12</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>qemu 手动搭建记录</p>
+<span id="more"></span>
+
+<h2 id="安装qemu"><a href="#安装qemu" class="headerlink" title="安装qemu"></a>安装qemu</h2><ol>
+<li>在Arch Linux下</li>
+</ol>
+<p>执行以下命令。qemu 安装虚拟机本体， qemu 安装非x86_64架构的其他架构。</p>
+<blockquote>
+<p>sudo pacman -S qemu qemu-arch-extra</p>
+</blockquote>
+<ol start="2">
+<li>在CentOS下。</li>
+</ol>
+<p>epel库只带qemu2.0，而要qemu只有3.0以上才支持aarch64，因此需要编译。<br>从<a href="">官网</a>下载源码。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">yum install git glib2-devel libfdt-devel pixman-devel zlib-devel</span><br><span class="line">tar xvf qemu-x.tar.xz  </span><br><span class="line"><span class="built_in">cd</span> qemu-xxxx  </span><br><span class="line">./configure  </span><br><span class="line">make &amp;&amp; make install</span><br></pre></td></tr></table></figure>
+
+<h2 id="虚拟机镜像部署"><a href="#虚拟机镜像部署" class="headerlink" title="虚拟机镜像部署"></a>虚拟机镜像部署</h2><p>创建虚拟磁盘用来存储系统</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">qemu-img create -f qcow2 centos-aarch64.qcow2 100G</span><br></pre></td></tr></table></figure>
+
+<p>下载aarch64下ovmf的UEFI boot，可以从<a target="_blank" rel="noopener" href="https://releases.linaro.org/reference-platform/enterprise/latest/uefi/release/qemu-aarch64/">这里</a>得到，保存为 QEMU_EFI-aarch64.fd。</p>
+<p>确认以下文件都存在，且在同一目录下。</p>
+<ul>
+<li>aarch64的CentOS镜像 CentOS-7-aarch64-Everything-xxxx.iso</li>
+<li>aarch64的UEFI boot QEMU_EFI-aarch64.fd</li>
+<li>aarch64的CentOS虚拟机存储文件 centos-aarch64.qcow2</li>
+</ul>
+<p>安装系统</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">qemu-system-aarch64 \</span><br><span class="line">-m 4096 \</span><br><span class="line">-cpu cortex-a72 \</span><br><span class="line">-smp 4 \</span><br><span class="line">-M virt \</span><br><span class="line">-bios QEMU_EFI-aarch64.fd \</span><br><span class="line">-nographic \</span><br><span class="line">-drive <span class="keyword">if</span>=none,file=CentOS-7-aarch64-Everything-xxxx.iso,<span class="built_in">id</span>=cdrom,media=cdrom \</span><br><span class="line">-device virtio-scsi-device \</span><br><span class="line">-device scsi-cd,drive=cdrom \</span><br><span class="line">-drive <span class="keyword">if</span>=none,file=centos-aarch64.qcow2,<span class="built_in">id</span>=hd0 \</span><br><span class="line">-device virtio-blk-device,drive=hd0</span><br></pre></td></tr></table></figure>
+
+<p>安装完成后运行虚拟机</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">qemu-system-aarch64 \</span><br><span class="line">-m 4096 \</span><br><span class="line">-cpu cortex-a72 \</span><br><span class="line">-smp 4 \</span><br><span class="line">-M virt \</span><br><span class="line">-bios QEMU_EFI-aarch64.fd \</span><br><span class="line">-nographic \</span><br><span class="line">-device virtio-scsi-device \</span><br><span class="line">-drive <span class="keyword">if</span>=none,file=centos-aarch64.qcow2,<span class="built_in">id</span>=hd0 \</span><br><span class="line">-device virtio-blk-device,drive=hd0</span><br></pre></td></tr></table></figure>
+
+<p>此时的系统因为没有配置可用的网卡因此无法连接网络。</p>
+<h2 id="虚拟机网络配置"><a href="#虚拟机网络配置" class="headerlink" title="虚拟机网络配置"></a>虚拟机网络配置</h2><h3 id="NAT"><a href="#NAT" class="headerlink" title="NAT"></a>NAT</h3><p>参考<a target="_blank" rel="noopener" href="https://wiki.qemu.org/Documentation/Networking/NAT">qemu文档</a></p>
+<p>安装依赖</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install bridge-utils iptables dnsmasq</span><br></pre></td></tr></table></figure>
+
+<p>将以下脚本保存为 <code>/etc/qemu-ifup</code> 并赋予可执行权限</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">chmod</span> 755 /etc/qemu-ifup</span><br></pre></td></tr></table></figure>
+
+<p>脚本</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/sh</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Copyright IBM, Corp. 2010  </span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Authors:</span></span><br><span class="line"><span class="comment">#  Anthony Liguori &lt;aliguori@us.ibm.com&gt;</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># This work is licensed under the terms of the GNU GPL, version 2.  See</span></span><br><span class="line"><span class="comment"># the COPYING file in the top-level directory.</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Set to the name of your bridge</span></span><br><span class="line">BRIDGE=br0</span><br><span class="line"></span><br><span class="line"><span class="comment"># Network information</span></span><br><span class="line">NETWORK=192.168.53.0</span><br><span class="line">NETMASK=255.255.255.0</span><br><span class="line">GATEWAY=192.168.53.1</span><br><span class="line">DHCPRANGE=192.168.53.2,192.168.53.254</span><br><span class="line"></span><br><span class="line"><span class="comment"># Optionally parameters to enable PXE support</span></span><br><span class="line">TFTPROOT=</span><br><span class="line">BOOTP=</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="title">do_brctl</span></span>() &#123;</span><br><span class="line">    brctl <span class="string">&quot;<span class="variable">$@</span>&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="title">do_ifconfig</span></span>() &#123;</span><br><span class="line">    ifconfig <span class="string">&quot;<span class="variable">$@</span>&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="title">do_dd</span></span>() &#123;</span><br><span class="line">    <span class="built_in">dd</span> <span class="string">&quot;<span class="variable">$@</span>&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="title">do_iptables_restore</span></span>() &#123;</span><br><span class="line">    iptables-restore <span class="string">&quot;<span class="variable">$@</span>&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="title">do_dnsmasq</span></span>() &#123;</span><br><span class="line">    dnsmasq <span class="string">&quot;<span class="variable">$@</span>&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="title">check_bridge</span></span>() &#123;</span><br><span class="line">    <span class="keyword">if</span> do_brctl show | grep <span class="string">&quot;^<span class="variable">$1</span>&quot;</span> &gt; /dev/null 2&gt; /dev/null; <span class="keyword">then</span></span><br><span class="line">	<span class="built_in">return</span> 1</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">	<span class="built_in">return</span> 0</span><br><span class="line">    <span class="keyword">fi</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="title">create_bridge</span></span>() &#123;</span><br><span class="line">    do_brctl addbr <span class="string">&quot;<span class="variable">$1</span>&quot;</span></span><br><span class="line">    do_brctl stp <span class="string">&quot;<span class="variable">$1</span>&quot;</span> off</span><br><span class="line">    do_brctl setfd <span class="string">&quot;<span class="variable">$1</span>&quot;</span> 0</span><br><span class="line">    do_ifconfig <span class="string">&quot;<span class="variable">$1</span>&quot;</span> <span class="string">&quot;<span class="variable">$GATEWAY</span>&quot;</span> netmask <span class="string">&quot;<span class="variable">$NETMASK</span>&quot;</span> up</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="title">enable_ip_forward</span></span>() &#123;</span><br><span class="line">    <span class="built_in">echo</span> 1 | do_dd of=/proc/sys/net/ipv4/ip_forward &gt; /dev/null</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="title">add_filter_rules</span></span>() &#123;</span><br><span class="line">do_iptables_restore &lt;&lt;<span class="string">EOF</span></span><br><span class="line"><span class="string"># Generated by iptables-save v1.3.6 on Fri Aug 24 15:20:25 2007</span></span><br><span class="line"><span class="string">*nat</span></span><br><span class="line"><span class="string">:PREROUTING ACCEPT [61:9671]</span></span><br><span class="line"><span class="string">:POSTROUTING ACCEPT [121:7499]</span></span><br><span class="line"><span class="string">:OUTPUT ACCEPT [132:8691]</span></span><br><span class="line"><span class="string">-A POSTROUTING -s $NETWORK/$NETMASK -j MASQUERADE </span></span><br><span class="line"><span class="string">COMMIT</span></span><br><span class="line"><span class="string"># Completed on Fri Aug 24 15:20:25 2007</span></span><br><span class="line"><span class="string"># Generated by iptables-save v1.3.6 on Fri Aug 24 15:20:25 2007</span></span><br><span class="line"><span class="string">*filter</span></span><br><span class="line"><span class="string">:INPUT ACCEPT [1453:976046]</span></span><br><span class="line"><span class="string">:FORWARD ACCEPT [0:0]</span></span><br><span class="line"><span class="string">:OUTPUT ACCEPT [1605:194911]</span></span><br><span class="line"><span class="string">-A INPUT -i $BRIDGE -p tcp -m tcp --dport 67 -j ACCEPT </span></span><br><span class="line"><span class="string">-A INPUT -i $BRIDGE -p udp -m udp --dport 67 -j ACCEPT </span></span><br><span class="line"><span class="string">-A INPUT -i $BRIDGE -p tcp -m tcp --dport 53 -j ACCEPT </span></span><br><span class="line"><span class="string">-A INPUT -i $BRIDGE -p udp -m udp --dport 53 -j ACCEPT </span></span><br><span class="line"><span class="string">-A FORWARD -i $1 -o $1 -j ACCEPT </span></span><br><span class="line"><span class="string">-A FORWARD -s $NETWORK/$NETMASK -i $BRIDGE -j ACCEPT </span></span><br><span class="line"><span class="string">-A FORWARD -d $NETWORK/$NETMASK -o $BRIDGE -m state --state RELATED,ESTABLISHED -j ACCEPT </span></span><br><span class="line"><span class="string">-A FORWARD -o $BRIDGE -j REJECT --reject-with icmp-port-unreachable </span></span><br><span class="line"><span class="string">-A FORWARD -i $BRIDGE -j REJECT --reject-with icmp-port-unreachable </span></span><br><span class="line"><span class="string">COMMIT</span></span><br><span class="line"><span class="string"># Completed on Fri Aug 24 15:20:25 2007</span></span><br><span class="line"><span class="string">EOF</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="title">start_dnsmasq</span></span>() &#123;</span><br><span class="line">    do_dnsmasq \</span><br><span class="line">	--strict-order \</span><br><span class="line">	--except-interface=lo \</span><br><span class="line">	--interface=<span class="variable">$BRIDGE</span> \</span><br><span class="line">	--listen-address=<span class="variable">$GATEWAY</span> \</span><br><span class="line">	--bind-interfaces \</span><br><span class="line">	--dhcp-range=<span class="variable">$DHCPRANGE</span> \</span><br><span class="line">	--conf-file=<span class="string">&quot;&quot;</span> \</span><br><span class="line">	--pid-file=/var/run/qemu-dnsmasq-<span class="variable">$BRIDGE</span>.pid \</span><br><span class="line">	--dhcp-leasefile=/var/run/qemu-dnsmasq-<span class="variable">$BRIDGE</span>.leases \</span><br><span class="line">	--dhcp-no-override \</span><br><span class="line">	<span class="variable">$&#123;TFTPROOT:+&quot;--enable-tftp&quot;&#125;</span> \</span><br><span class="line">	<span class="variable">$&#123;TFTPROOT:+&quot;--tftp-root=$TFTPROOT&quot;&#125;</span> \</span><br><span class="line">	<span class="variable">$&#123;BOOTP:+&quot;--dhcp-boot=$BOOTP&quot;&#125;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="title">setup_bridge_nat</span></span>() &#123;</span><br><span class="line">    <span class="keyword">if</span> check_bridge <span class="string">&quot;<span class="variable">$1</span>&quot;</span> ; <span class="keyword">then</span></span><br><span class="line">	create_bridge <span class="string">&quot;<span class="variable">$1</span>&quot;</span></span><br><span class="line">	enable_ip_forward</span><br><span class="line">	add_filter_rules <span class="string">&quot;<span class="variable">$1</span>&quot;</span></span><br><span class="line">	start_dnsmasq <span class="string">&quot;<span class="variable">$1</span>&quot;</span></span><br><span class="line">    <span class="keyword">fi</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="title">setup_bridge_vlan</span></span>() &#123;</span><br><span class="line">    <span class="keyword">if</span> check_bridge <span class="string">&quot;<span class="variable">$1</span>&quot;</span> ; <span class="keyword">then</span></span><br><span class="line">	create_bridge <span class="string">&quot;<span class="variable">$1</span>&quot;</span></span><br><span class="line">	start_dnsmasq <span class="string">&quot;<span class="variable">$1</span>&quot;</span></span><br><span class="line">    <span class="keyword">fi</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">setup_bridge_nat <span class="string">&quot;<span class="variable">$BRIDGE</span>&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> <span class="built_in">test</span> <span class="string">&quot;<span class="variable">$1</span>&quot;</span> ; <span class="keyword">then</span></span><br><span class="line">    do_ifconfig <span class="string">&quot;<span class="variable">$1</span>&quot;</span> 0.0.0.0 up</span><br><span class="line">    do_brctl addif <span class="string">&quot;<span class="variable">$BRIDGE</span>&quot;</span> <span class="string">&quot;<span class="variable">$1</span>&quot;</span></span><br><span class="line"><span class="keyword">fi</span></span><br></pre></td></tr></table></figure>
+
+<p>运行虚拟机</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">qemu-system-aarch64 \</span><br><span class="line">-m 4096 \</span><br><span class="line">-cpu cortex-a72 \</span><br><span class="line">-smp 4 \</span><br><span class="line">-M virt \</span><br><span class="line">-bios QEMU_EFI-aarch64.fd \</span><br><span class="line">-nographic \</span><br><span class="line">-device virtio-scsi-device \</span><br><span class="line">-drive <span class="keyword">if</span>=none,file=centos-aarch64.qcow2,<span class="built_in">id</span>=hd0 \</span><br><span class="line">-device virtio-blk-device,drive=hd0 \</span><br><span class="line">-net tap \</span><br><span class="line">-net nic</span><br></pre></td></tr></table></figure>
+
+<h3 id="桥接"><a href="#桥接" class="headerlink" title="桥接"></a>桥接</h3><p>创建br0虚拟网卡并挂载到可连接外网的网卡上，以eth0举例</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">sudo ip <span class="built_in">link</span> add name br0 <span class="built_in">type</span> bridge</span><br><span class="line">sudo ip <span class="built_in">link</span> <span class="built_in">set</span> dev br0 up</span><br><span class="line">sudo ip <span class="built_in">link</span> <span class="built_in">set</span> eth0 promisc on</span><br><span class="line">sudo ip <span class="built_in">link</span> <span class="built_in">set</span> dev eth0 master br0</span><br></pre></td></tr></table></figure>
+
+<p>此时Host原ip会不可连，需给br0赋予ip</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl start dhcpcd@br0</span><br></pre></td></tr></table></figure>
+
+<p>允许qemu通过br0连接网络</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> <span class="string">&quot;allow br0&quot;</span> &gt;&gt; /etc/qemu/bridge.conf</span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;allow br0&quot;</span> &gt;&gt; /usr/local/etc/qemu/bridge.conf</span><br></pre></td></tr></table></figure>
+
+<p>运行虚拟机</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">qemu-system-aarch64 \</span><br><span class="line">-m 4096 \</span><br><span class="line">-cpu cortex-a72 \</span><br><span class="line">-smp 4 \</span><br><span class="line">-M virt \</span><br><span class="line">-bios QEMU_EFI-aarch64.fd \</span><br><span class="line">-nographic \</span><br><span class="line">-device virtio-scsi-device \</span><br><span class="line">-drive <span class="keyword">if</span>=none,file=centos-aarch64.qcow2,<span class="built_in">id</span>=hd0 \</span><br><span class="line">-device virtio-blk-device,drive=hd0 \</span><br><span class="line">-net nic \</span><br><span class="line">-net bridge,br=br0</span><br></pre></td></tr></table></figure>
+
+<h3 id="SR-IOV"><a href="#SR-IOV" class="headerlink" title="SR-IOV"></a>SR-IOV</h3><h4 id="准备-SR-IOV-环境"><a href="#准备-SR-IOV-环境" class="headerlink" title="准备 SR-IOV 环境"></a>准备 SR-IOV 环境</h4><p>参考另一篇文章</p>
+<p>确认 IOMMU 功能确实打开</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">dmesg | grep -e DMAR -e IOMMU</span><br><span class="line"></span><br><span class="line">...</span><br><span class="line">DMAR: IOMMU enabled</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>确认 Virtual Functional 已经开启</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">lspci -vv  | grep Eth</span><br><span class="line"></span><br><span class="line">18:00.0 Ethernet controller: Intel Corporation 82599ES 10-Gigabit SFI/SFP+ Network Connection (rev 01)</span><br><span class="line">18:00.1 Ethernet controller: Intel Corporation 82599ES 10-Gigabit SFI/SFP+ Network Connection (rev 01)</span><br><span class="line">18:10.0 Ethernet controller: Intel Corporation 82599 Ethernet Controller Virtual Function (rev 01)</span><br><span class="line">18:10.2 Ethernet controller: Intel Corporation 82599 Ethernet Controller Virtual Function (rev 01)</span><br></pre></td></tr></table></figure>
+
+<h4 id="给设备挂载-vfio-驱动"><a href="#给设备挂载-vfio-驱动" class="headerlink" title="给设备挂载 vfio 驱动"></a>给设备挂载 vfio 驱动</h4><p>挂载 vfio-pci 驱动可以通过手动挂载，也可以通过 DPDK 的 usertools 下的脚本进行挂载。</p>
+<p>加载 vfio 相关模块</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">modprobe vfio</span><br><span class="line">modprobe vfio-pci</span><br></pre></td></tr></table></figure>
+
+<p>确认加载是否成功</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">lsmod | grep vfio</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>解绑原有设备驱动</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看目标网卡设备锁在 iommu_group</span></span><br><span class="line"><span class="built_in">ls</span> /sys/bus/pci/devices/0000:18:10.0/iommu_group/devices</span><br><span class="line"></span><br><span class="line"><span class="comment"># 解绑驱动</span></span><br><span class="line"><span class="built_in">echo</span> 0000:18:10.0 &gt; /sys/bus/pci/devices/0000:18:10.0/driver/unbind</span><br></pre></td></tr></table></figure>
+
+<p>获取设备厂商号和型号</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">lspci -ns 0000:18:10.0</span><br><span class="line">18:10.0 0300: 8086:370d (rev 06)</span><br></pre></td></tr></table></figure>
+
+<p>绑定 vfio-pci 驱动</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> 8086 370d &gt; /sys/bus/pci/drivers/vfio-pci/new_id</span><br></pre></td></tr></table></figure>
+
+<p>运行虚拟机</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">qemu-system-aarch64 \</span><br><span class="line">-m 4096 \</span><br><span class="line">-cpu cortex-a72 \</span><br><span class="line">-smp 4 \</span><br><span class="line">-M virt \</span><br><span class="line">-bios QEMU_EFI-aarch64.fd \</span><br><span class="line">-nographic \</span><br><span class="line">-device virtio-scsi-device \</span><br><span class="line">-drive <span class="keyword">if</span>=none,file=centos-aarch64.qcow2,<span class="built_in">id</span>=hd0 \</span><br><span class="line">-device virtio-blk-device,drive=hd0 \</span><br><span class="line">-net tap \</span><br><span class="line">-net nic \</span><br><span class="line">-device vfio-pci,host=0000:18:10.0</span><br></pre></td></tr></table></figure>
+
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/sriov/" rel="tag"># sriov</a>
+              <a href="/tags/centos/" rel="tag"># centos</a>
+              <a href="/tags/qemu/" rel="tag"># qemu</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2020/09/20/f-stack-usage/" rel="prev" title="F-STACK 编译安装与使用">
+                  <i class="fa fa-angle-left"></i> F-STACK 编译安装与使用
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2020/10/11/multigit-account-with-ssh/" rel="next" title="多Git账号配置ssh">
+                  多Git账号配置ssh <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2023</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">collia</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

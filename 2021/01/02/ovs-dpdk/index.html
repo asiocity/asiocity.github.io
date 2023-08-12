@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"example.com","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.18.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="ovs 一般是供虚拟机一起使用, 因此本文的主机已开启了 sriov 与虚拟化相关功能支持, DPDK 使用 vfio 驱动.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="OVS-DPDK 编译与使用">
+<meta property="og:url" content="http://example.com/2021/01/02/ovs-dpdk/index.html">
+<meta property="og:site_name" content="collia&#39;s blog">
+<meta property="og:description" content="ovs 一般是供虚拟机一起使用, 因此本文的主机已开启了 sriov 与虚拟化相关功能支持, DPDK 使用 vfio 驱动.">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-01-02T13:15:00.000Z">
+<meta property="article:modified_time" content="2023-08-12T07:41:20.763Z">
+<meta property="article:author" content="collia">
+<meta property="article:tag" content="dpdk">
+<meta property="article:tag" content="ovs">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://example.com/2021/01/02/ovs-dpdk/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://example.com/2021/01/02/ovs-dpdk/","path":"2021/01/02/ovs-dpdk/","title":"OVS-DPDK 编译与使用"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>OVS-DPDK 编译与使用 | collia's blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">collia's blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#0x00-DPDK-%E7%BC%96%E8%AF%91"><span class="nav-number">1.</span> <span class="nav-text">0x00 DPDK 编译</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x01-OVS-%E7%BC%96%E8%AF%91"><span class="nav-number">2.</span> <span class="nav-text">0x01 OVS 编译</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x02-%E7%B3%BB%E7%BB%9F%E9%85%8D%E7%BD%AE"><span class="nav-number">3.</span> <span class="nav-text">0x02 系统配置</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E7%BB%91%E5%AE%9A%E9%A9%B1%E5%8A%A8"><span class="nav-number">3.1.</span> <span class="nav-text">1. 绑定驱动</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E5%A4%A7%E9%A1%B5%E8%AE%BE%E7%BD%AE"><span class="nav-number">3.2.</span> <span class="nav-text">2. 大页设置</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x03-%E5%90%AF%E5%8A%A8-OVS"><span class="nav-number">4.</span> <span class="nav-text">0x03 启动 OVS</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E7%94%9F%E6%88%90%E9%BB%98%E8%AE%A4%E9%85%8D%E7%BD%AE"><span class="nav-number">4.1.</span> <span class="nav-text">1. 生成默认配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E5%90%AF%E5%8A%A8-ovsdb"><span class="nav-number">4.2.</span> <span class="nav-text">2. 启动 ovsdb</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E5%90%AF%E5%8A%A8-ovs-vswitchd"><span class="nav-number">4.3.</span> <span class="nav-text">3. 启动 ovs-vswitchd</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E9%AA%8C%E8%AF%81"><span class="nav-number">4.4.</span> <span class="nav-text">4. 验证</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x04-%E5%88%9B%E5%BB%BA%E7%BD%91%E6%A1%A5%E5%92%8C%E7%BD%91%E5%8F%A3"><span class="nav-number">5.</span> <span class="nav-text">0x04 创建网桥和网口</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E5%88%9B%E5%BB%BA%E4%BD%BF%E7%94%A8-dpdk-%E7%9A%84%E7%BD%91%E6%A1%A5"><span class="nav-number">5.1.</span> <span class="nav-text">1. 创建使用 dpdk 的网桥</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E6%8F%92%E5%85%A5%E7%BD%91%E5%8F%A3"><span class="nav-number">5.2.</span> <span class="nav-text">2. 插入网口</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E4%BD%BF%E7%94%A8%E7%BD%91%E5%8F%A3"><span class="nav-number">5.3.</span> <span class="nav-text">3. 使用网口</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#3-1-libvirt"><span class="nav-number">5.3.1.</span> <span class="nav-text">3.1 libvirt</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-2-qemu"><span class="nav-number">5.3.2.</span> <span class="nav-text">3.2 qemu</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0xff-%E5%8F%82%E8%80%83"><span class="nav-number">6.</span> <span class="nav-text">0xff 参考</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">collia</p>
+  <div class="site-description" itemprop="description">recording</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">15</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/01/02/ovs-dpdk/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="collia">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="collia's blog">
+      <meta itemprop="description" content="recording">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="OVS-DPDK 编译与使用 | collia's blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          OVS-DPDK 编译与使用
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-01-02 21:15:00" itemprop="dateCreated datePublished" datetime="2021-01-02T21:15:00+08:00">2021-01-02</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-08-12 15:41:20" itemprop="dateModified" datetime="2023-08-12T15:41:20+08:00">2023-08-12</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>ovs 一般是供虚拟机一起使用, 因此本文的主机已开启了 sriov 与虚拟化相关功能支持, DPDK 使用 vfio 驱动.</p>
+<span id="more"></span>
+
+<h2 id="0x00-DPDK-编译"><a href="#0x00-DPDK-编译" class="headerlink" title="0x00 DPDK 编译"></a>0x00 DPDK 编译</h2><p>请参考另一篇.</p>
+<h2 id="0x01-OVS-编译"><a href="#0x01-OVS-编译" class="headerlink" title="0x01 OVS 编译"></a>0x01 OVS 编译</h2><p>源码下载:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">wget https://www.openvswitch.org/releases/openvswitch-x.x.x.tar.gz</span><br><span class="line">tar -zxvf openvswitch-x.x.x.tar.gz</span><br></pre></td></tr></table></figure>
+
+<p>安装依赖:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install -y python3 python36-six python2 python2-six gcc-c++ ...</span><br></pre></td></tr></table></figure>
+
+<p>编译:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">./boot.sh</span><br><span class="line"></span><br><span class="line">./configure --with-dpdk=$RTE_SDK/$RTE_TARGET --disable-ssl --disable-libcapng</span><br><span class="line"></span><br><span class="line">make -j16 &amp;&amp; make install</span><br></pre></td></tr></table></figure>
+
+<h2 id="0x02-系统配置"><a href="#0x02-系统配置" class="headerlink" title="0x02 系统配置"></a>0x02 系统配置</h2><h3 id="1-绑定驱动"><a href="#1-绑定驱动" class="headerlink" title="1. 绑定驱动"></a>1. 绑定驱动</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">加载 vfio</span></span><br><span class="line">modprobe vfio-pci</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">首先保证网卡非活动</span></span><br><span class="line">ip link set ethx down</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看当前网卡信息</span></span><br><span class="line">./usertools/dpdk-devbind.py --status</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">使用dpdk脚本进行绑定</span></span><br><span class="line">./usertools/dpdk-devbind.py --bind=vfio-pci 00:09.0 ...</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">还原</span></span><br><span class="line">./usertools/dpdk-devbind.py --bind=ixgbe 00:09.0 ...</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-大页设置"><a href="#2-大页设置" class="headerlink" title="2. 大页设置"></a>2. 大页设置</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看numa支持 支持的机器会显示 node, 需要安装 numactl</span></span><br><span class="line">numastat</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">让系统自动去分配大页内存</span></span><br><span class="line">echo 2048 &gt; /sys/kernel/mm/hugepages/hugepages-2048kB/nr_hugepages</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">对于有 numa 的机器, 假设有两个 node</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">清空大页内存只需要把数字改 0 即可</span></span><br><span class="line">echo 1024 &gt; /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages</span><br><span class="line">echo 1024 &gt; /sys/devices/system/node/node1/hugepages/hugepages-2048kB/nr_hugepages</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">挂载大页内存</span></span><br><span class="line">mkdir /mnt/huge</span><br><span class="line">mount -t hugetlbfs nodev /mnt/huge</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">mount -t hugetlbfs none /mnt/huge -o pagesize=2MB</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">mount -t hugetlbfs none /mnt/huge -o pagesize=1GB</span></span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">可以把大页内存加入 /etc/fstab 中</span></span><br><span class="line">echo &quot;nodev /mnt/huge hugetlbfs defaults 0 0&quot; &gt;&gt; /etc/fstab</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">如果要使用 1GB 的页</span></span><br><span class="line">echo &quot;nodev /mnt/huge_1GB hugetlbfs pagesize=1GB 0 0&quot; &gt;&gt; /etc/fstab</span><br></pre></td></tr></table></figure>
+
+<h2 id="0x03-启动-OVS"><a href="#0x03-启动-OVS" class="headerlink" title="0x03 启动 OVS"></a>0x03 启动 OVS</h2><h3 id="1-生成默认配置"><a href="#1-生成默认配置" class="headerlink" title="1. 生成默认配置"></a>1. 生成默认配置</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">mkdir -p /usr/local/etc/openvswitch</span><br><span class="line">ovsdb-tool create /usr/local/etc/openvswitch/conf.db \</span><br><span class="line">    vswitchd/vswitch.ovsschema</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-启动-ovsdb"><a href="#2-启动-ovsdb" class="headerlink" title="2. 启动 ovsdb"></a>2. 启动 ovsdb</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">mkdir -p /usr/local/var/run/openvswitch</span><br><span class="line">mkdir -p /usr/local/var/log/openvswitch/ovsdb-server</span><br><span class="line">ovsdb-server \</span><br><span class="line">    --remote=punix:/usr/local/var/run/openvswitch/db.sock \</span><br><span class="line">    --remote=db:Open_vSwitch,Open_vSwitch,manager_options \</span><br><span class="line">    --pidfile --detach --log-file</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">with ssl</span></span><br><span class="line">ovsdb-server \</span><br><span class="line">    --remote=punix:/usr/local/var/run/openvswitch/db.sock \</span><br><span class="line">    --remote=db:Open_vSwitch,Open_vSwitch,manager_options \</span><br><span class="line">    --private-key=db:Open_vSwitch,SSL,private_key \</span><br><span class="line">    --certificate=db:Open_vSwitch,SSL,certificate \</span><br><span class="line">    --bootstrap-ca-cert=db:Open_vSwitch,SSL,ca_cert \</span><br><span class="line">    --pidfile --detach --log-file</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>  If you built Open vSwitch without SSL support, then omit <code>--private-key</code>, <code>--certificate</code>, and <code>--bootstrap-ca-cert</code>.)</p>
+</blockquote>
+<h3 id="3-启动-ovs-vswitchd"><a href="#3-启动-ovs-vswitchd" class="headerlink" title="3. 启动 ovs-vswitchd"></a>3. 启动 ovs-vswitchd</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">export PATH=$PATH:/usr/local/share/openvswitch/scripts</span><br><span class="line">export DB_SOCK=/usr/local/var/run/openvswitch/db.sock</span><br><span class="line">ovs-vsctl --no-wait init</span><br><span class="line">ovs-vsctl --no-wait set Open_vSwitch . other_config:dpdk-init=true</span><br><span class="line">ovs-ctl --no-ovsdb-server --db-sock=&quot;$DB_SOCK&quot; start</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-验证"><a href="#4-验证" class="headerlink" title="4. 验证"></a>4. 验证</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">ovs-vsctl get Open_vSwitch . dpdk_initialized</span><br><span class="line">true</span><br><span class="line"></span><br><span class="line">ovs-vswitchd --version</span><br><span class="line">ovs-vswitchd (Open vSwitch) 2.11.0</span><br><span class="line">DPDK 18.11.7</span><br><span class="line"></span><br><span class="line">ovs-vsctl get Open_vSwitch . dpdk_version</span><br><span class="line">&quot;DPDK 18.11.7&quot;</span><br></pre></td></tr></table></figure>
+
+<h2 id="0x04-创建网桥和网口"><a href="#0x04-创建网桥和网口" class="headerlink" title="0x04 创建网桥和网口"></a>0x04 创建网桥和网口</h2><h3 id="1-创建使用-dpdk-的网桥"><a href="#1-创建使用-dpdk-的网桥" class="headerlink" title="1. 创建使用 dpdk 的网桥"></a>1. 创建使用 dpdk 的网桥</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ovs-vsctl add-br br0 -- set bridge br0 datapath_type=netdev</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>  <code>-- set bridge br0 datapath_type=netdev</code> 通过该命令创建出来的虚拟网桥无法与宿主机进行通信, 数据包能 ping 通但无法进行 tcp 交互. 如要在 vm 内与宿主机进行直接通信需要再创建一个不带此命令的网桥, xml 文件中连接上该网桥即可.</p>
+</blockquote>
+<h3 id="2-插入网口"><a href="#2-插入网口" class="headerlink" title="2. 插入网口"></a>2. 插入网口</h3><p>把 dpdk 网口插入网桥中</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ovs-vsctl add-port br0 dpdk-p0 -- \</span><br><span class="line">    set Interface dpdk-p0 \</span><br><span class="line">    type=dpdk options:dpdk-devargs=0000:86:00.0</span><br></pre></td></tr></table></figure>
+
+<p>创建 vhostuser 网口</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ovs-vsctl add-port br0 dpdkvhostuser0 -- set Interface dpdkvhostuser0 type=dpdkvhostuser [ofport_request=&lt;N&gt;]</span><br></pre></td></tr></table></figure>
+
+<p>创建 vhostuserclient 网口</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ovs-vsctl add-port br0 dpdkvhostclient0 -- set Interface dpdkvhostclient0 type=dpdkvhostuserclient options:vhost-server-path=/usr/local/var/run/openvswitch/dpdkvhostclient0</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-使用网口"><a href="#3-使用网口" class="headerlink" title="3. 使用网口"></a>3. 使用网口</h3><h4 id="3-1-libvirt"><a href="#3-1-libvirt" class="headerlink" title="3.1 libvirt"></a>3.1 libvirt</h4><p>在 xml 配置中添加相关网口. 需要配置大页内存的配置, 让 qemu 能访问大页内存与 ovs-dpdk 进行通信, 配置该项之后, 虚拟机所用的内存会全部使用大页内存, 不会再使用普通内存.</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">memoryBacking</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">hugepages</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">page</span> <span class="attr">size</span>=<span class="string">&#x27;2&#x27;</span> <span class="attr">unit</span>=<span class="string">&#x27;M&#x27;</span> <span class="attr">nodeset</span>=<span class="string">&#x27;0&#x27;</span>/&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">hugepages</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">memoryBacking</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">cputune</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">shares</span>&gt;</span>4096<span class="tag">&lt;/<span class="name">shares</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">cputune</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">cpu</span> <span class="attr">...</span>&gt;</span></span><br><span class="line">...</span><br><span class="line">  <span class="tag">&lt;<span class="name">numa</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">cell</span> <span class="attr">id</span>=<span class="string">&#x27;0&#x27;</span> <span class="attr">cpus</span>=<span class="string">&#x27;0-1&#x27;</span> <span class="attr">memory</span>=<span class="string">&#x27;4194304&#x27;</span> <span class="attr">unit</span>=<span class="string">&#x27;KiB&#x27;</span> <span class="attr">memAccess</span>=<span class="string">&#x27;shared&#x27;</span>/&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">numa</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">cpu</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>通过 ovs 桥接派生网口</li>
+</ul>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">interface</span> <span class="attr">type</span>=<span class="string">&#x27;vhostuser&#x27;</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">mac</span> <span class="attr">address</span>=<span class="string">&#x27;de:ad:be:ef:ac:02&#x27;</span>/&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">source</span> <span class="attr">type</span>=<span class="string">&#x27;unix&#x27;</span> <span class="attr">path</span>=<span class="string">&#x27;/usr/local/var/run/openvswitch/dpdkvhostclient0&#x27;</span> <span class="attr">mode</span>=<span class="string">&#x27;server&#x27;</span>/&gt;</span></span><br><span class="line">   <span class="tag">&lt;<span class="name">model</span> <span class="attr">type</span>=<span class="string">&#x27;virtio&#x27;</span>/&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">driver</span> <span class="attr">queues</span>=<span class="string">&#x27;2&#x27;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">host</span> <span class="attr">mrg_rxbuf</span>=<span class="string">&#x27;on&#x27;</span>/&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">driver</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">interface</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>使用 vhostuser</li>
+</ul>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">interface</span> <span class="attr">type</span>=<span class="string">&#x27;vhostuser&#x27;</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">mac</span> <span class="attr">address</span>=<span class="string">&#x27;00:00:00:00:00:01&#x27;</span>/&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">source</span> <span class="attr">type</span>=<span class="string">&#x27;unix&#x27;</span> <span class="attr">path</span>=<span class="string">&#x27;/usr/local/var/run/openvswitch/dpdkvhostuser0&#x27;</span> <span class="attr">mode</span>=<span class="string">&#x27;client&#x27;</span>/&gt;</span></span><br><span class="line">   <span class="tag">&lt;<span class="name">model</span> <span class="attr">type</span>=<span class="string">&#x27;virtio&#x27;</span>/&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">driver</span> <span class="attr">queues</span>=<span class="string">&#x27;2&#x27;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">host</span> <span class="attr">mrg_rxbuf</span>=<span class="string">&#x27;on&#x27;</span>/&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">driver</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">interface</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>使用 vhostuserclient</li>
+</ul>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">interface</span> <span class="attr">type</span>=<span class="string">&#x27;vhostuser&#x27;</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">mac</span> <span class="attr">address</span>=<span class="string">&#x27;00:00:00:00:00:02&#x27;</span>/&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">source</span> <span class="attr">type</span>=<span class="string">&#x27;unix&#x27;</span> <span class="attr">path</span>=<span class="string">&#x27;/usr/local/var/run/openvswitch/dpdkvhostclient0&#x27;</span> <span class="attr">mode</span>=<span class="string">&#x27;server&#x27;</span>/&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">model</span> <span class="attr">type</span>=<span class="string">&#x27;virtio&#x27;</span>/&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">driver</span> <span class="attr">queues</span>=<span class="string">&#x27;2&#x27;</span>&gt;</span></span><br><span class="line">     <span class="tag">&lt;<span class="name">host</span> <span class="attr">mrg_rxbuf</span>=<span class="string">&#x27;on&#x27;</span>/&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">driver</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">interface</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="3-2-qemu"><a href="#3-2-qemu" class="headerlink" title="3.2 qemu"></a>3.2 qemu</h4><p>在启动参数中加入相关参数:</p>
+<ul>
+<li><p>vhostuser</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">-chardev socket,id=char1,path=/usr/local/var/run/openvswitch/vhost-user-1 \</span><br><span class="line">-netdev type=vhost-user,id=mynet1,chardev=char1,vhostforce \</span><br><span class="line">-device virtio-net-pci,mac=00:00:00:00:00:01,netdev=mynet1 \</span><br><span class="line">-object memory-backend-file,id=mem,size=4096M,mem-path=/dev/huge,share=on \</span><br><span class="line">-numa node,memdev=mem -mem-prealloc</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>vhostuserclient</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">-chardev socket,id=char1,path=$VHOST_USER_SOCKET_PATH,server \</span><br><span class="line">-netdev type=vhost-user,id=mynet1,chardev=char1,vhostforce \</span><br><span class="line">-device virtio-net-pci,mac=00:00:00:00:00:01,netdev=mynet1 \</span><br><span class="line">-object memory-backend-file,id=mem,size=4096M,mem-path=/dev/hugepages,share=on \</span><br><span class="line">-numa node,memdev=mem -mem-prealloc</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="0xff-参考"><a href="#0xff-参考" class="headerlink" title="0xff 参考"></a>0xff 参考</h2><p><a target="_blank" rel="noopener" href="https://docs.openvswitch.org/en/latest/intro/install/general/">Open vSwitch on Linux, FreeBSD and NetBSD</a></p>
+<p><a target="_blank" rel="noopener" href="https://docs.openvswitch.org/en/latest/intro/install/dpdk/">Open vSwitch with DPDK</a></p>
+<p><a target="_blank" rel="noopener" href="https://osinstom.github.io/en/tutorial/configuring-ovs-dpdk-with-vm/#configuring-ovs-dpdk">Configuring OVS-DPDK with VM</a></p>
+<p><a target="_blank" rel="noopener" href="https://docs.openvswitch.org/en/latest/topics/dpdk/vdev/">DPDK Virtual Devices</a></p>
+<p><a target="_blank" rel="noopener" href="https://docs.openvswitch.org/en/latest/topics/dpdk/vhost-user/">DPDK vHost User Ports</a></p>
+<p><a target="_blank" rel="noopener" href="https://docs.openvswitch.org/en/latest/topics/dpdk/phy/">DPDK Physical Ports</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.redhat.com/en/blog/ovs-dpdk-migrating-vhostuser-socket-mode-red-hat-openstack">OVS-DPDK: Migrating to vhostuser socket mode in Red Hat OpenStack</a></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/dpdk/" rel="tag"># dpdk</a>
+              <a href="/tags/ovs/" rel="tag"># ovs</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2020/10/11/multigit-account-with-ssh/" rel="prev" title="多Git账号配置ssh">
+                  <i class="fa fa-angle-left"></i> 多Git账号配置ssh
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/01/02/binary-symbols-with-debug/" rel="next" title="可执行文件符号表导出与使用">
+                  可执行文件符号表导出与使用 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2023</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">collia</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

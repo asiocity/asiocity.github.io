@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"example.com","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.18.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="DPDK 在 CentOS 7 上的编译使用记录">
+<meta property="og:type" content="article">
+<meta property="og:title" content="DPDK 编译安装与使用">
+<meta property="og:url" content="http://example.com/2020/06/11/dpdk-usage/index.html">
+<meta property="og:site_name" content="collia&#39;s blog">
+<meta property="og:description" content="DPDK 在 CentOS 7 上的编译使用记录">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-06-11T15:15:00.000Z">
+<meta property="article:modified_time" content="2023-08-12T07:41:20.763Z">
+<meta property="article:author" content="collia">
+<meta property="article:tag" content="dpdk">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://example.com/2020/06/11/dpdk-usage/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://example.com/2020/06/11/dpdk-usage/","path":"2020/06/11/dpdk-usage/","title":"DPDK 编译安装与使用"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>DPDK 编译安装与使用 | collia's blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">collia's blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#0x00-%E5%87%86%E5%A4%87"><span class="nav-number">1.</span> <span class="nav-text">0x00 准备</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-BIOS-%E8%AE%BE%E7%BD%AE"><span class="nav-number">1.1.</span> <span class="nav-text">1. BIOS 设置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E7%B3%BB%E7%BB%9F%E7%8E%AF%E5%A2%83"><span class="nav-number">1.2.</span> <span class="nav-text">2. 系统环境</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-%E6%9F%A5%E7%9C%8B%E5%92%8C%E5%8D%87%E7%BA%A7-Linux-%E5%86%85%E6%A0%B8-CentOS-7"><span class="nav-number">1.2.1.</span> <span class="nav-text">2.1 查看和升级 Linux 内核(CentOS 7)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-%E6%94%AF%E6%8C%81%E7%9A%84%E7%BD%91%E5%8D%A1%E8%AE%BE%E5%A4%87"><span class="nav-number">1.2.2.</span> <span class="nav-text">2.2 支持的网卡设备</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x01-%E7%BC%96%E8%AF%91"><span class="nav-number">2.</span> <span class="nav-text">0x01 编译</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E4%B8%8B%E8%BD%BD-DPDK-%E6%BA%90%E6%96%87%E4%BB%B6"><span class="nav-number">2.1.</span> <span class="nav-text">1. 下载 DPDK 源文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E4%BF%AE%E6%94%B9%E6%BA%90%E6%96%87%E4%BB%B6-%E9%9D%9E%E5%BF%85%E9%A1%BB"><span class="nav-number">2.2.</span> <span class="nav-text">2. 修改源文件(非必须)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E9%85%8D%E7%BD%AE%E4%B8%8E%E7%BC%96%E8%AF%91"><span class="nav-number">2.3.</span> <span class="nav-text">2. 配置与编译</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-%E6%89%8B%E5%8A%A8%E9%85%8D%E7%BD%AE"><span class="nav-number">2.3.1.</span> <span class="nav-text">2.1 手动配置</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-%E4%BD%BF%E7%94%A8-meson-%E5%92%8C-ninjia"><span class="nav-number">2.3.2.</span> <span class="nav-text">2.2 使用 meson 和 ninjia</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-3-%E5%85%B6%E4%BB%96%E9%80%89%E9%A1%B9"><span class="nav-number">2.3.3.</span> <span class="nav-text">2.3 其他选项</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-4-%E4%BD%BF%E7%94%A8%E8%84%9A%E6%9C%AC%E7%BC%96%E8%AF%91%E5%92%8C%E9%85%8D%E7%BD%AE"><span class="nav-number">2.3.4.</span> <span class="nav-text">2.4 使用脚本编译和配置</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x02-%E4%BD%BF%E7%94%A8-DPDK"><span class="nav-number">3.</span> <span class="nav-text">0x02 使用 DPDK</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E5%8A%A0%E8%BD%BD%E9%A9%B1%E5%8A%A8"><span class="nav-number">3.1.</span> <span class="nav-text">1. 加载驱动</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E7%BB%91%E5%AE%9A%E7%BD%91%E5%8D%A1%E9%A9%B1%E5%8A%A8"><span class="nav-number">3.2.</span> <span class="nav-text">2. 绑定网卡驱动</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E8%AE%BE%E7%BD%AE%E5%A4%A7%E9%A1%B5%E5%86%85%E5%AD%98"><span class="nav-number">3.3.</span> <span class="nav-text">3. 设置大页内存</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E8%AE%BE%E7%BD%AE%E5%BA%93%E8%B7%AF%E5%BE%84"><span class="nav-number">3.4.</span> <span class="nav-text">4. 设置库路径</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-%E4%BD%BF%E7%94%A8-example"><span class="nav-number">3.5.</span> <span class="nav-text">5. 使用 example</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0xff-%E5%85%B6%E4%BB%96"><span class="nav-number">4.</span> <span class="nav-text">0xff 其他</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-EAL-%E9%83%A8%E5%88%86%E5%8F%82%E6%95%B0%E8%AF%B4%E6%98%8E"><span class="nav-number">4.1.</span> <span class="nav-text">1. EAL 部分参数说明</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-virtio-user-%E6%8E%A5%E5%8F%A3%E4%BD%BF%E7%94%A8"><span class="nav-number">4.2.</span> <span class="nav-text">2. virtio_user 接口使用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E5%8D%95%E6%9C%BA%E5%90%AF%E5%8A%A8%E5%A4%9A-DPDK-%E5%BA%94%E7%94%A8"><span class="nav-number">4.3.</span> <span class="nav-text">3. 单机启动多 DPDK 应用</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-%E7%BD%91%E5%8D%A1%E7%9A%84%E6%89%8B%E5%8A%A8%E5%86%85%E6%A0%B8%E7%BB%91%E5%AE%9A"><span class="nav-number">5.</span> <span class="nav-text">4. 网卡的手动内核绑定</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">collia</p>
+  <div class="site-description" itemprop="description">recording</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">15</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/06/11/dpdk-usage/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="collia">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="collia's blog">
+      <meta itemprop="description" content="recording">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="DPDK 编译安装与使用 | collia's blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          DPDK 编译安装与使用
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-06-11 23:15:00" itemprop="dateCreated datePublished" datetime="2020-06-11T23:15:00+08:00">2020-06-11</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-08-12 15:41:20" itemprop="dateModified" datetime="2023-08-12T15:41:20+08:00">2023-08-12</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>DPDK 在 CentOS 7 上的编译使用记录</p>
+<span id="more"></span>
+
+<h2 id="0x00-准备"><a href="#0x00-准备" class="headerlink" title="0x00 准备"></a>0x00 准备</h2><h3 id="1-BIOS-设置"><a href="#1-BIOS-设置" class="headerlink" title="1. BIOS 设置"></a>1. BIOS 设置</h3><p>如果 UEFI secure boot 被启用了, Linux 内核可能会禁止系统使用 UIO, 请关闭相应设置或者使用 vfio-pci 内核模块, <a target="_blank" rel="noopener" href="https://doc.dpdk.org/guides/linux_gsg/linux_drivers.html#linux-gsg-binding-kernel">详见</a>.</p>
+<h3 id="2-系统环境"><a href="#2-系统环境" class="headerlink" title="2. 系统环境"></a>2. 系统环境</h3><ul>
+<li>Linux kernel &gt;&#x3D; 3.10</li>
+<li>Linux kernel headers and modules(etc. kernel-devel)</li>
+<li>gcc 4.9+ &#x2F; clang 3.4+</li>
+<li>Python 2.7+ &#x2F; 3.5+</li>
+<li>Meson 0.47.1+</li>
+<li>ninjia</li>
+<li>Library for handling NUMA(Non Uniform Memory Access)<ul>
+<li>numactl-devel</li>
+<li>libnuma-dev</li>
+</ul>
+</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">centos 7</span></span><br><span class="line">yum install -y kernel-devel gcc python make numactl-devel libpcap-devel pciutils</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-1-查看和升级-Linux-内核-CentOS-7"><a href="#2-1-查看和升级-Linux-内核-CentOS-7" class="headerlink" title="2.1 查看和升级 Linux 内核(CentOS 7)"></a>2.1 查看和升级 Linux 内核(CentOS 7)</h4><p>DPDK 对 Linux 内核有要求, CentOS 默认的内核版本为 3.10, 低版本 DPDK 无法使用.</p>
+<p>查看当前内核版本:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cat /boot/grub2/grub.cfg | grep menuentry </span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">或者</span></span><br><span class="line">uname -r</span><br></pre></td></tr></table></figure>
+
+<p>推荐使用 elrepo 编译好的 CentOS 内核.</p>
+<p>安装 elrepo:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">rpm -Uvh https://www.elrepo.org/elrepo-release-7.0-3.el7.elrepo.noarch.rpm</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">可以同时设置好镜像加速 推荐使用清华源</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">baseurl=https://mirrors.tuna.tsinghua.edu.cn/elrepo/elrepo/el7/<span class="variable">$basearch</span>/</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">baseurl=https://mirrors.tuna.tsinghua.edu.cn/elrepo/kernel/el7/<span class="variable">$basearch</span>/</span></span><br></pre></td></tr></table></figure>
+
+<p>避免冲突，卸载旧版的一些包</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum remove -y kernel-headers kernel-tools kernel-tools-libs</span><br></pre></td></tr></table></figure>
+
+<p>安装lt版内核:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum --enablerepo=elrepo-kernel install kernel-lt kernel-lt-devel kernel-lt-headers</span><br></pre></td></tr></table></figure>
+
+<p>查看当前可以使用的内核启动项:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">bios</span></span><br><span class="line">awk -F\&#x27; &#x27;$1==&quot;menuentry &quot; &#123;print i++ &quot; : &quot; $2&#125;&#x27; /etc/grub2.cfg</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">uefi</span></span><br><span class="line">awk -F\&#x27; &#x27;$1==&quot;menuentry &quot; &#123;print i++ &quot; : &quot; $2&#125;&#x27; /boot//efi/EFI/centos/grub.cfg</span><br></pre></td></tr></table></figure>
+
+<p>设置默认启动内核:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">grub2-set-default 0</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">或者</span></span><br><span class="line">grub2-set-default &quot;CentOS Linux (xxxx) 7 (Core)&quot;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">备份</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">如果是 BIOS</span></span><br><span class="line">cp /boot/grub2/grub.cfg /boot/grub2/grub.cfg.bak</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">如果是 UEFI</span></span><br><span class="line">cp /boot/efi/EFI/centos/grub.cfg /boot/efi/EFI/centosgrub.cfg.bak</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">重新生成配置 BIOS</span></span><br><span class="line">grub2-mkconfig -o /boot/grub2/grub.cfg</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">重新生成配置 UEFI</span></span><br><span class="line">grub2-mkconfig -o /boot/efi/EFI/centos/grub.cfg</span><br></pre></td></tr></table></figure>
+
+<p>验证:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">grub2-editenv list</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">或者</span></span><br><span class="line">uname -r</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-2-支持的网卡设备"><a href="#2-2-支持的网卡设备" class="headerlink" title="2.2 支持的网卡设备"></a>2.2 支持的网卡设备</h4><p>参考官网<a target="_blank" rel="noopener" href="http://core.dpdk.org/supported/">设备列表</a></p>
+<h2 id="0x01-编译"><a href="#0x01-编译" class="headerlink" title="0x01 编译"></a>0x01 编译</h2><h3 id="1-下载-DPDK-源文件"><a href="#1-下载-DPDK-源文件" class="headerlink" title="1. 下载 DPDK 源文件"></a>1. 下载 DPDK 源文件</h3><p>从<a target="_blank" rel="noopener" href="http://core.dpdk.org/download/">官网</a>下载源文件，解压。本文基于 19.11。</p>
+<ul>
+<li>lib: DPDK 库文件</li>
+<li>drivers: DPDK 轮询驱动源文件</li>
+<li>app: DPDK 应用程序 (自动测试)源文件</li>
+<li>examples: DPDK 应用例程</li>
+<li>config, buildtools, mk: 框架相关的 makefile、脚本及配置文件</li>
+</ul>
+<h3 id="2-修改源文件-非必须"><a href="#2-修改源文件-非必须" class="headerlink" title="2. 修改源文件(非必须)"></a>2. 修改源文件(非必须)</h3><p>可能可以提高性能.</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// drivers/net/ixgbe/base/ixgbe_common.c</span></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> *  ixgbe_enable_relaxed_ordering_gen2 - Enable relaxed ordering</span></span><br><span class="line"><span class="comment"> *  @hw: pointer to hardware structure</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> **/</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">ixgbe_enable_relaxed_ordering_gen2</span><span class="params">(<span class="keyword">struct</span> ixgbe_hw *hw)</span></span><br><span class="line">&#123;</span><br><span class="line">    u32 regval;</span><br><span class="line">    u32 i;</span><br><span class="line">   </span><br><span class="line">    DEBUGFUNC(<span class="string">&quot;ixgbe_enable_relaxed_ordering_gen2&quot;</span>);</span><br><span class="line">   </span><br><span class="line">    <span class="comment">/* Enable relaxed ordering */</span></span><br><span class="line">    <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; hw-&gt;mac.max_tx_queues; i++) &#123;</span><br><span class="line">        regval = IXGBE_READ_REG(hw, IXGBE_DCA_TXCTRL_82599(i));</span><br><span class="line"><span class="meta">#<span class="keyword">if</span> 0</span></span><br><span class="line">        regval |= IXGBE_DCA_TXCTRL_DESC_WRO_EN;</span><br><span class="line"><span class="meta">#<span class="keyword">else</span>   </span></span><br><span class="line">        regval |= IXGBE_DCA_TXCTRL_DESC_WRO_EN |</span><br><span class="line">                  IXGBE_DCA_TXCTRL_DESC_RRO_EN |</span><br><span class="line">                  IXGBE_DCA_TXCTRL_DATA_RRO_EN;</span><br><span class="line">        IXGBE_WRITE_REG(hw, IXGBE_DCA_TXCTRL_82599(i), regval);</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line">    &#125;</span><br><span class="line">   </span><br><span class="line">    <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; hw-&gt;mac.max_rx_queues; i++) &#123;</span><br><span class="line">        regval = IXGBE_READ_REG(hw, IXGBE_DCA_RXCTRL(i));</span><br><span class="line"><span class="meta">#<span class="keyword">if</span> 0</span></span><br><span class="line">        regval |= IXGBE_DCA_RXCTRL_DATA_WRO_EN |</span><br><span class="line">              IXGBE_DCA_RXCTRL_HEAD_WRO_EN;</span><br><span class="line"><span class="meta">#<span class="keyword">else</span>   </span></span><br><span class="line">        regval |= IXGBE_DCA_RXCTRL_DATA_WRO_EN |</span><br><span class="line">                  IXGBE_DCA_RXCTRL_HEAD_WRO_EN |</span><br><span class="line">                  IXGBE_DCA_TXCTRL_DESC_RRO_EN;</span><br><span class="line">        IXGBE_WRITE_REG(hw, IXGBE_DCA_RXCTRL(i), regval);</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line">    &#125;</span><br><span class="line">   </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> *  ixgbe_start_hw_gen2 - Init sequence for common device family</span></span><br><span class="line"><span class="comment"> *  @hw: pointer to hw structure</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * Performs the init sequence common to the second generation</span></span><br><span class="line"><span class="comment"> * of 10 GbE devices.</span></span><br><span class="line"><span class="comment"> * Devices in the second generation:</span></span><br><span class="line"><span class="comment"> *     82599</span></span><br><span class="line"><span class="comment"> *     X540</span></span><br><span class="line"><span class="comment"> **/</span></span><br><span class="line">s32 <span class="title function_">ixgbe_start_hw_gen2</span><span class="params">(<span class="keyword">struct</span> ixgbe_hw *hw)</span> </span><br><span class="line">&#123;</span><br><span class="line">    u32 i;</span><br><span class="line">    u32 regval;</span><br><span class="line"> </span><br><span class="line">    <span class="comment">/* Clear the rate limiters */</span></span><br><span class="line">    <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; hw-&gt;mac.max_tx_queues; i++) &#123;</span><br><span class="line">        IXGBE_WRITE_REG(hw, IXGBE_RTTDQSEL, i);</span><br><span class="line">        IXGBE_WRITE_REG(hw, IXGBE_RTTBCNRC, <span class="number">0</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    IXGBE_WRITE_FLUSH(hw);</span><br><span class="line"> </span><br><span class="line"><span class="meta">#<span class="keyword">if</span> 0</span></span><br><span class="line">    <span class="comment">/* Disable relaxed ordering */</span></span><br><span class="line">    <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; hw-&gt;mac.max_tx_queues; i++) &#123;</span><br><span class="line">        regval = IXGBE_READ_REG(hw, IXGBE_DCA_TXCTRL_82599(i));</span><br><span class="line">        regval &amp;= ~IXGBE_DCA_TXCTRL_DESC_WRO_EN;</span><br><span class="line">        IXGBE_WRITE_REG(hw, IXGBE_DCA_TXCTRL_82599(i), regval);</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; hw-&gt;mac.max_rx_queues; i++) &#123;</span><br><span class="line">        regval = IXGBE_READ_REG(hw, IXGBE_DCA_RXCTRL(i));</span><br><span class="line">        regval &amp;= ~(IXGBE_DCA_RXCTRL_DATA_WRO_EN |</span><br><span class="line">                IXGBE_DCA_RXCTRL_HEAD_WRO_EN);</span><br><span class="line">        IXGBE_WRITE_REG(hw, IXGBE_DCA_RXCTRL(i), regval);</span><br><span class="line">    &#125;</span><br><span class="line"><span class="meta">#<span class="keyword">else</span></span></span><br><span class="line">    ixgbe_enable_relaxed_ordering(hw);</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> IXGBE_SUCCESS;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// kernel/linux/kni/compat.h 兼容 aarch64 的 centos 7</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> * RHEL has two different version with different kernel version:</span></span><br><span class="line"><span class="comment"> * 3.10 is for AMD, Intel, IBM POWER7 and POWER8;</span></span><br><span class="line"><span class="comment"> * 4.14 is for ARM and IBM POWER9</span></span><br><span class="line"><span class="comment"> */</span>                                                               <span class="comment">/*                           </span></span><br><span class="line"><span class="comment">#if (defined(RHEL_RELEASE_CODE) &amp;&amp; \</span></span><br><span class="line"><span class="comment">    (RHEL_RELEASE_CODE &gt;= RHEL_RELEASE_VERSION(7, 5)) &amp;&amp; \</span></span><br><span class="line"><span class="comment">    (RHEL_RELEASE_CODE &lt; RHEL_RELEASE_VERSION(8, 0)) &amp;&amp; \</span></span><br><span class="line"><span class="comment">    (LINUX_VERSION_CODE &lt; KERNEL_VERSION(4, 14, 0)))</span></span><br><span class="line"><span class="comment">#define ndo_change_mtu ndo_change_mtu_rh74</span></span><br><span class="line"><span class="comment">#endif</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="2-配置与编译"><a href="#2-配置与编译" class="headerlink" title="2. 配置与编译"></a>2. 配置与编译</h3><p>解压并进入 DPDK 源码根目录</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cd dpdk-xxx/</span><br></pre></td></tr></table></figure>
+
+<p>设置环境变量</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">设置 DPDK SDK 所在目录, 设置编译输出目录</span></span><br><span class="line">export RTE_SDK=$(pwd) &amp;&amp; export RTE_TARGET=build</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-1-手动配置"><a href="#2-1-手动配置" class="headerlink" title="2.1 手动配置"></a>2.1 手动配置</h4><p>DPDK目标文件的格式为:</p>
+<blockquote>
+<p>ARCH-MACHINE-EXECENV-TOOLCHAIN</p>
+</blockquote>
+<p>其中：</p>
+<ul>
+<li>ARCH 可以是: i686, x86_64, ppc_64, arm64</li>
+<li>MACHINE 可以是: native, power8, armv8a</li>
+<li>EXECENV 可以是: linux, freebsd</li>
+<li>TOOLCHAIN 可以是: gcc, icc, clang</li>
+</ul>
+<p>设置好编译参数并编译 DPDK 库</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">直接编译</span></span><br><span class="line">make install T=x86_64-native-linux-gcc [DESTDIR=/usr/local/dpdk] -j 16</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">设置编译器和环境再进行编译</span></span><br><span class="line">make config T=x86_64-native-linux-gcc; make -j 16</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">make config T=x86_64-native-linuxapp-gcc; make -j 16</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">make config T=x86_64-native-linux-clang; make -j 16</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="2-2-使用-meson-和-ninjia"><a href="#2-2-使用-meson-和-ninjia" class="headerlink" title="2.2 使用 meson 和 ninjia"></a>2.2 使用 meson 和 ninjia</h4><p>通过 meson 和 ninjia 配置 DPDK 编译环境:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">meson &lt;options&gt; build</span><br><span class="line">cd build</span><br><span class="line">ninja</span><br><span class="line">ninja install</span><br><span class="line">ldconfig</span><br></pre></td></tr></table></figure>
+
+<p>设置好编译参数并编译 DPDK 库</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">直接编译</span></span><br><span class="line">make install T=x86_64-native-linux-gcc [DESTDIR=/usr/local/dpdk] -j 16</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-3-其他选项"><a href="#2-3-其他选项" class="headerlink" title="2.3 其他选项"></a>2.3 其他选项</h4><p>编译成动态库:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">make CONFIG_RTE_BUILD_SHARED_LIB=y ...</span><br></pre></td></tr></table></figure>
+
+<p>20.02开始默认不编译 <code>igb_uio</code>, 如有需要:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">make CONFIG_RTE_EAL_IGB_UIO=y ...</span><br></pre></td></tr></table></figure>
+
+<p>添加 debug 选项:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">make EXTRA_CFLAGS=&quot;-O0 -g&quot;</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-4-使用脚本编译和配置"><a href="#2-4-使用脚本编译和配置" class="headerlink" title="2.4 使用脚本编译和配置"></a>2.4 使用脚本编译和配置</h4><p>为了能清晰的进行编译和配置, 第一次使用时推荐使用 usertools 下的 dpdk-setup.sh 进行编译和配置:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line">cd usertools; ./dpdk-setup.sh</span><br><span class="line">============================</span><br><span class="line">------------------------------------------------------------------------------</span><br><span class="line"> RTE_SDK exported as /root/dpdk-stable-18.11.2</span><br><span class="line">------------------------------------------------------------------------------</span><br><span class="line">----------------------------------------------------------</span><br><span class="line"> Step 1: Select the DPDK environment to build</span><br><span class="line">----------------------------------------------------------</span><br><span class="line">[1] arm64-armv8a-linuxapp-clang</span><br><span class="line">[2] arm64-armv8a-linuxapp-gcc</span><br><span class="line">[3] arm64-dpaa2-linuxapp-gcc</span><br><span class="line">[4] arm64-dpaa-linuxapp-gcc</span><br><span class="line">[5] arm64-stingray-linuxapp-gcc</span><br><span class="line">[6] arm64-thunderx-linuxapp-gcc</span><br><span class="line">[7] arm64-xgene1-linuxapp-gcc</span><br><span class="line">[8] arm-armv7a-linuxapp-gcc</span><br><span class="line">[9] i686-native-linuxapp-gcc</span><br><span class="line">[10] i686-native-linuxapp-icc</span><br><span class="line">[11] ppc_64-power8-linuxapp-gcc</span><br><span class="line">[12] x86_64-native-bsdapp-clang</span><br><span class="line">[13] x86_64-native-bsdapp-gcc</span><br><span class="line">[14] x86_64-native-linuxapp-clang</span><br><span class="line">[15] x86_64-native-linuxapp-gcc</span><br><span class="line">[16] x86_64-native-linuxapp-icc</span><br><span class="line">[17] x86_x32-native-linuxapp-gcc</span><br><span class="line"></span><br><span class="line">----------------------------------------------------------</span><br><span class="line"> Step 2: Setup linuxapp environment</span><br><span class="line">----------------------------------------------------------</span><br><span class="line">[18] Insert IGB UIO module</span><br><span class="line">[19] Insert VFIO module</span><br><span class="line">[20] Insert KNI module</span><br><span class="line">[21] Setup hugepage mappings for non-NUMA systems</span><br><span class="line">[22] Setup hugepage mappings for NUMA systems</span><br><span class="line">[23] Display current Ethernet/Crypto device settings</span><br><span class="line">[24] Bind Ethernet/Crypto device to IGB UIO module</span><br><span class="line">[25] Bind Ethernet/Crypto device to VFIO module</span><br><span class="line">[26] Setup VFIO permissions</span><br><span class="line"></span><br><span class="line">----------------------------------------------------------</span><br><span class="line"> Step 3: Run test application for linuxapp environment</span><br><span class="line">----------------------------------------------------------</span><br><span class="line">[27] Run test application ($RTE_TARGET/app/test)</span><br><span class="line">[28] Run testpmd application in interactive mode ($RTE_TARGET/app/testpmd)</span><br><span class="line"></span><br><span class="line">----------------------------------------------------------</span><br><span class="line"> Step 4: Other tools</span><br><span class="line">----------------------------------------------------------</span><br><span class="line">[29] List hugepage info from /proc/meminfo</span><br><span class="line"></span><br><span class="line">----------------------------------------------------------</span><br><span class="line"> Step 5: Uninstall and system cleanup</span><br><span class="line">----------------------------------------------------------</span><br><span class="line">[30] Unbind devices from IGB UIO or VFIO driver</span><br><span class="line">[31] Remove IGB UIO module</span><br><span class="line">[32] Remove VFIO module</span><br><span class="line">[33] Remove KNI module</span><br><span class="line">[34] Remove hugepage mappings</span><br><span class="line"></span><br><span class="line">[35] Exit Script</span><br><span class="line"></span><br><span class="line">Option: </span><br></pre></td></tr></table></figure>
+
+<ol>
+<li><p>按需进行编译, 如在 x64 的 Linux 下使用 gcc 进行编译则选择15, 要和环境变量的一样.</p>
+</li>
+<li><p>挂载 uio 内核模块, 可选择 igb_uio 或者 vfio. 推荐使用 vfio, 需要开启 iommu.</p>
+</li>
+<li><p>配置大页内存, 至少 512, 按照推荐的 64 会报错.</p>
+</li>
+<li><p>将网卡挂载到 igb_uio &#x2F; vfio 上.</p>
+</li>
+</ol>
+<h2 id="0x02-使用-DPDK"><a href="#0x02-使用-DPDK" class="headerlink" title="0x02 使用 DPDK"></a>0x02 使用 DPDK</h2><h3 id="1-加载驱动"><a href="#1-加载驱动" class="headerlink" title="1. 加载驱动"></a>1. 加载驱动</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">加载 igb_uio</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看系统是否加载 uio 模块</span></span><br><span class="line">lsmod | grep uio</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">如果没有加载需要手动挂载该模块</span></span><br><span class="line">modprobe uio</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">把编译好的 igb_uio 加载进内核</span></span><br><span class="line">insmod /path/to/dpdk/build/kmod/igb_uio.ko</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">加载 kni</span></span><br><span class="line">insmod /path/to/dpdk/build/kmod/rte_kni.ko</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">加载 vfio</span></span><br><span class="line">modprobe vfio-pci</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">卸载驱动</span></span><br><span class="line">rmmod igb_uio</span><br><span class="line">rmmod vfio-pci</span><br><span class="line">rmmod vfio</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>  20.02 开始默认使用的是 uio_pci_generic, 它不支持 virtual function, 因此会和 sriov 产生一定 的冲突, 需要换回 igb_uio &#x2F; vfio, 而且 uio_pci_generic 使用的时候需要把 intel_iommu &#x2F; amd_iommu 关闭.</p>
+</blockquote>
+<h3 id="2-绑定网卡驱动"><a href="#2-绑定网卡驱动" class="headerlink" title="2. 绑定网卡驱动"></a>2. 绑定网卡驱动</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">首先保证网卡非活动</span></span><br><span class="line">ip link set ethx down</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看当前网卡信息</span></span><br><span class="line">./usertools/dpdk-devbind.py --status</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">使用dpdk脚本进行绑定</span></span><br><span class="line">./usertools/dpdk-devbind.py --bind=igb_uio 00:09.0 ...</span><br><span class="line">./usertools/dpdk-devbind.py --bind=igb_uio eth1 ...</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">还原</span></span><br><span class="line">./usertools/dpdk-devbind.py --bind=ixgbe 00:09.0 ...</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-设置大页内存"><a href="#3-设置大页内存" class="headerlink" title="3. 设置大页内存"></a>3. 设置大页内存</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看numa支持 支持的机器会显示 node, 需要安装 numactl</span></span><br><span class="line">numastat</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">让系统自动去分配大页内存</span></span><br><span class="line">echo 2048 &gt; /sys/kernel/mm/hugepages/hugepages-2048kB/nr_hugepages</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">对于有 numa 的机器, 假设有两个 node</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">清空大页内存只需要把数字改 0 即可</span></span><br><span class="line">echo 1024 &gt; /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages</span><br><span class="line">echo 1024 &gt; /sys/devices/system/node/node1/hugepages/hugepages-2048kB/nr_hugepages</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">挂载大页内存</span></span><br><span class="line">mkdir /mnt/huge</span><br><span class="line">mount -t hugetlbfs nodev /mnt/huge</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">mount -t hugetlbfs none /mnt/huge -o pagesize=2MB</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">mount -t hugetlbfs none /mnt/huge -o pagesize=1GB</span></span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">可以把大页内存加入 /etc/fstab 中</span></span><br><span class="line">echo &quot;nodev /mnt/huge hugetlbfs defaults 0 0&quot; &gt;&gt; /etc/fstab</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">如果要使用 1GB 的页</span></span><br><span class="line">echo &quot;nodev /mnt/huge_1GB hugetlbfs pagesize=1GB 0 0&quot; &gt;&gt; /etc/fstab</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-设置库路径"><a href="#4-设置库路径" class="headerlink" title="4. 设置库路径"></a>4. 设置库路径</h3><p>如果使用了动态库进行编译, 需要设置动态库环境查找环境:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">echo &quot;/path/to/dpdk/lib&quot; &gt;&gt; /etc/ld.conf.d/dpdk.conf</span><br><span class="line">ldconfig</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-使用-example"><a href="#5-使用-example" class="headerlink" title="5. 使用 example"></a>5. 使用 example</h3><p>进入 example 目录编译</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">之前已经设置环境变量 RTE_SDK, make 的时候依赖这个环境变量</span></span><br><span class="line">cd example &amp;&amp; make</span><br></pre></td></tr></table></figure>
+
+<p>使用 helloworld 进行测试</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">./helloworld/x86_64-native-linuxapp-gcc/helloworld -c f</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">-c 指 coremask 十六进制的数代表使用几号 cpu 核心, f 代表 1111 指使用 0-3 号共 4 颗 cpu.</span></span><br></pre></td></tr></table></figure>
+
+<p>如果出现 <code>EAL:   Invalid NUMA socket, default to 0</code>, 可以修改对应网卡的 numa 设置:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vim /sys/bus/pci/devices/[device_pci_id]/numa_node</span><br></pre></td></tr></table></figure>
+
+<h2 id="0xff-其他"><a href="#0xff-其他" class="headerlink" title="0xff 其他"></a>0xff 其他</h2><h3 id="1-EAL-部分参数说明"><a href="#1-EAL-部分参数说明" class="headerlink" title="1. EAL 部分参数说明"></a>1. EAL 部分参数说明</h3><ul>
+<li><p><code>-c</code> 以十六进制形式指定需要运行的核,转成二进制后,对应的位数为1表示运行在相应的核上。</p>
+<blockquote>
+<p>  -c 0x5 即二进制 0101 表示运行在0和2号cpu上</p>
+</blockquote>
+</li>
+<li><p><code>-l</code> 指定运行在哪几个核上</p>
+<blockquote>
+<p>  -l 0-2,4 即运行在id为0,1,2,4的cpu上</p>
+</blockquote>
+</li>
+<li><p><code>--lcores</code> 设置lcore集运行在指定的cpu集上，格式如下</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">--lcores=&#x27;&lt;lcore_set&gt;[@cpu_set][,&lt;lcore_set&gt;[@cpu_set],...]&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>如果没有指定cpu集，那么cpu号和lcore号一样</p>
+<blockquote>
+<p>  --lcores&#x3D;’1,2@(5-7),(3-5)@(0,2),(0,6),7-8’</p>
+<p>  这会开启9个EAL的线程</p>
+<p>  lcore 0 在(0,6)中被设置，因此会运行在id为0和id为6的cpu上(0x41)</p>
+<p>  lcore 1 在1中被设置，因此会运行在id为1的cpu上(0x2)</p>
+<p>  lcore 2 在2@(5-7)中被设置，因此会运行在id为5到id为7的cpu上(0xe0)</p>
+<p>  lcore 3-5 在(3-5)@(0,2)中被设置，因此会运行在id为0和id为2的cpu上(0x5)</p>
+<p>  lcore 6 在(0,6)中被设置，因此会运行在id为0和id为6的cpu上(0x41)</p>
+<p>  lcore 7 在7-8中被设置，因此会运行在id为7的cpu上(0x80)</p>
+<p>  lcore 8 在7-8中被设置，因此会运行在id为8的cpu上(0x100)</p>
+</blockquote>
+</li>
+<li><p><code>-n</code> 内存通道数</p>
+</li>
+</ul>
+<h3 id="2-virtio-user-接口使用"><a href="#2-virtio-user-接口使用" class="headerlink" title="2. virtio_user 接口使用"></a>2. virtio_user 接口使用</h3><p>启用 virtio_user 接口代替 kni 与内核通信, 添加参数:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">--vdev=virtio_user&lt;num&gt;,path=/dev/vhost-net&lt;,mac=xx:xx:xx:xx:xx:xx&gt;</span><br></pre></td></tr></table></figure>
+
+<p>virtio 的 mac 需要和业务口的 mac 一样, 否则无法与外界通信.</p>
+<h3 id="3-单机启动多-DPDK-应用"><a href="#3-单机启动多-DPDK-应用" class="headerlink" title="3. 单机启动多 DPDK 应用"></a>3. 单机启动多 DPDK 应用</h3><p>需要进行数据隔离, 启动时添加参数:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">--file-prefix=&lt;container_prefix_name&gt;</span><br></pre></td></tr></table></figure>
+
+<h2 id="4-网卡的手动内核绑定"><a href="#4-网卡的手动内核绑定" class="headerlink" title="4. 网卡的手动内核绑定"></a>4. 网卡的手动内核绑定</h2><p>网卡的手动内核绑定</p>
+<p>需要使用支持多队列的网卡, 可以用以下命令查看当前网卡是否支持:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">➜ ~ cat /proc/interrupts | grep enp4s0</span><br><span class="line"> 40:         10          0          0          0          0          0  IR-PCI-MSI-edge      enp4s0-TxRx-0</span><br><span class="line"> 41:          8          0          0          0          0          0  IR-PCI-MSI-edge      enp4s0-TxRx-1</span><br><span class="line"> 42:         24          0          0          0          0          0  IR-PCI-MSI-edge      enp4s0</span><br></pre></td></tr></table></figure>
+
+<p>最前面的是中断号, 使用以下命令查看绑定状态:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看当前绑定状态 绑定在</span></span><br><span class="line">➜  ~ cat /proc/irq/40/smp_affinity</span><br><span class="line">10</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">绑定到 3 号 cpu 上(按照 0, 1, 2, 4, 8, 10, 11, 12, 14, 18 ...)</span></span><br><span class="line">➜  ~ echo 4 &gt; /proc/irq/40/smp_affinity      </span><br><span class="line">➜  ~ cat /proc/irq/40/smp_affinity     </span><br><span class="line">04</span><br></pre></td></tr></table></figure>
+
+
+
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/dpdk/" rel="tag"># dpdk</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2020/06/10/null_type/" rel="prev" title="C/C++ null 类型">
+                  <i class="fa fa-angle-left"></i> C/C++ null 类型
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2020/06/20/sriov-on-centos/" rel="next" title="在 CentOS 上使用 SRIOV">
+                  在 CentOS 上使用 SRIOV <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2023</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">collia</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

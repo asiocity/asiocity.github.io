@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"example.com","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.18.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="F-STACK 的编译使用以及一些问题的规避">
+<meta property="og:type" content="article">
+<meta property="og:title" content="F-STACK 编译安装与使用">
+<meta property="og:url" content="http://example.com/2020/09/20/f-stack-usage/index.html">
+<meta property="og:site_name" content="collia&#39;s blog">
+<meta property="og:description" content="F-STACK 的编译使用以及一些问题的规避">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-09-19T16:00:00.000Z">
+<meta property="article:modified_time" content="2023-08-12T07:41:20.763Z">
+<meta property="article:author" content="collia">
+<meta property="article:tag" content="dpdk">
+<meta property="article:tag" content="f-stack">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://example.com/2020/09/20/f-stack-usage/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://example.com/2020/09/20/f-stack-usage/","path":"2020/09/20/f-stack-usage/","title":"F-STACK 编译安装与使用"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>F-STACK 编译安装与使用 | collia's blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">collia's blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%A9%E7%95%A5%E8%AF%AD%E5%8F%8A%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="nav-number">1.</span> <span class="nav-text">缩略语及基本概念</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%8E%AF%E5%A2%83%E8%A6%81%E6%B1%82"><span class="nav-number">2.</span> <span class="nav-text">环境要求</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85"><span class="nav-number">3.</span> <span class="nav-text">安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95"><span class="nav-number">4.</span> <span class="nav-text">测试</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B6%E4%BB%96"><span class="nav-number">5.</span> <span class="nav-text">其他</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">collia</p>
+  <div class="site-description" itemprop="description">recording</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">15</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/09/20/f-stack-usage/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="collia">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="collia's blog">
+      <meta itemprop="description" content="recording">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="F-STACK 编译安装与使用 | collia's blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          F-STACK 编译安装与使用
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-09-20 00:00:00" itemprop="dateCreated datePublished" datetime="2020-09-20T00:00:00+08:00">2020-09-20</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-08-12 15:41:20" itemprop="dateModified" datetime="2023-08-12T15:41:20+08:00">2023-08-12</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>F-STACK 的编译使用以及一些问题的规避</p>
+<span id="more"></span>
+
+<ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/F-Stack/f-stack">F-STACK 官方方文文档</a></li>
+<li><a target="_blank" rel="noopener" href="https://core.dpdk.org/doc/archives/">dpdk官方方文文档</a> F-STACK当前版本使用用 dpdk 18.11 版本</li>
+</ul>
+<h2 id="缩略语及基本概念"><a href="#缩略语及基本概念" class="headerlink" title="缩略语及基本概念"></a>缩略语及基本概念</h2><ul>
+<li><p>DPDK - Data Plane Development Kit 数据⾯开发⼯作集</p>
+</li>
+<li><p>EAL - Environment Abstraction Layer 环境抽象层</p>
+<p>提供了⼀个通⽤接⼝，隐藏应⽤程序和库中的环境细节。</p>
+</li>
+<li><p>rte - runtime environment 运⾏时环境</p>
+</li>
+<li><p>PMD - Poll Mode Drivers 提供全⽤户态的驱动</p>
+</li>
+<li><p>lcore</p>
+<p>EAL线程(eal pthread)，由eal创建和管理，执⾏的任务函数由remote_launch的回调函数指定，在每个EAL pthread中，有⼀个名为lcore_id的TLS(thread local storage)作为唯⼀标识，由于通常情况下eal pthread和CPU是1:1绑定，所以lcore_id⼀般等于CPU ID号</p>
+</li>
+<li><p>KNI - Kernel Network Interface</p>
+<p>主要是和Linux内核协议栈建⽴通道，因为有些和性能⽆关的但和管理、功能等相关的东⻄直接使⽤Linux内核协议栈更⽅便。 </p>
+</li>
+<li><p>LPM - 最⻓匹配</p>
+<p>由Classify库提供，除了LPM，还有Exact Match(精确匹配)和ACL(通配符匹 配)。 </p>
+</li>
+<li><p>port</p>
+<p>指⽹卡，如port 0指第⼀块⽹卡,port 1指第⼆块⽹卡。</p>
+</li>
+</ul>
+<h2 id="环境要求"><a href="#环境要求" class="headerlink" title="环境要求"></a>环境要求</h2><p>F-STACK 基于 DPDK 因此参考<a target="_blank" rel="noopener" href="http://doc.dpdk.org/guides/linux_gsg/sys_reqs.html">DPDK 环境要求</a>即可。</p>
+<ul>
+<li>Linux kernel &gt;&#x3D; 3.16</li>
+<li>内核配置<ul>
+<li>HUGETLBFS 大页内存</li>
+<li>PROC_PAGEi_MONITOR 支持</li>
+</ul>
+</li>
+<li>GNU make</li>
+<li>gcc 4.9+</li>
+<li>libc-headers(etc. glibc-devel libc6-dev)</li>
+<li>Linux kernel headers and modules(etc. kernel-devel)</li>
+<li>glibc &gt;&#x3D; 2.7</li>
+<li>libgcc</li>
+<li>libstdc++</li>
+<li>Library for handling NUMA(Non Uniform Memory Access)<ul>
+<li>numactl-devel</li>
+<li>libnuma-dev</li>
+</ul>
+</li>
+<li>Pyhton 2.7+ or 3.2+</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install -y numactl numactl-libs numactl-devel libpcap-devel gcc-c++ make cmake cmake3 pciutils</span><br></pre></td></tr></table></figure>
+
+<p>DPDK 相关问题参考 DPDK 文档</p>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p><a target="_blank" rel="noopener" href="https://github.com/F-Stack/f-stack/blob/master/doc/F-Stack_Quick_Start_Guide.md">官网快速使用手册</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/F-Stack/f-stack/blob/master/doc/F-Stack_Build_Guide.md">官网搭建向导手册</a></p>
+<p>基础环境安装</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install -y git gcc openssl-devel kernel-devel-$(uname -r) bc numactl-devel python libpcap libpcap-devel</span><br></pre></td></tr></table></figure>
+
+<p>下载源码</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> -p /data/f-stack</span><br><span class="line">git <span class="built_in">clone</span> https://github.com/F-Stack/f-stack.git /data/f-stack</span><br></pre></td></tr></table></figure>
+
+<p>编译与配置</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">cd /data/f-stack</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">Compile DPDK</span></span><br><span class="line">cd dpdk</span><br><span class="line">./usertools/dpdk-setup.sh # compile with x86_64-native-linuxapp-gcc</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">如有需要可安装</span></span><br><span class="line">cd build # 或者 x86_64-native-linuxapp-gcc</span><br><span class="line">make install</span><br></pre></td></tr></table></figure>
+
+<p>设置大页内存</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看numa支持 支持的机器会显示node</span></span><br><span class="line">numastat</span><br><span class="line"></span><br><span class="line"><span class="comment"># 对于没有numa的机器</span></span><br><span class="line"><span class="built_in">echo</span> 2048 &gt; /sys/kernel/mm/hugepages/hugepages-2048kB/nr_hugepages</span><br><span class="line"></span><br><span class="line"><span class="comment"># 对于又numa的机器 假设又两个node</span></span><br><span class="line"><span class="built_in">echo</span> 1024 &gt; /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages</span><br><span class="line"><span class="built_in">echo</span> 1024 &gt; /sys/devices/system/node/node1/hugepages/hugepages-2048kB/nr_hugepages</span><br><span class="line"></span><br><span class="line"><span class="comment"># 挂载大页内存</span></span><br><span class="line"><span class="built_in">mkdir</span> -p /mnt/huge</span><br><span class="line">mount -t hugetlbfs none /mnt/huge -o pagesize=2MB</span><br><span class="line"></span><br><span class="line"><span class="comment"># 清空大页内存只需要把数字改0即可</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 如果想永久保存,则在:/etc/fstab文文件中增加</span></span><br><span class="line">nodev /mnt/huge_1GB hugetlbfs pagesize=1GB 0 0</span><br></pre></td></tr></table></figure>
+
+<p>关闭 ASLR</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">Close ASLR; it is necessary <span class="keyword">in</span> multiple process</span></span><br><span class="line">echo 0 &gt; /proc/sys/kernel/randomize_va_space</span><br></pre></td></tr></table></figure>
+
+<p>加载编译好的驱动</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看和移除系统自带的uio</span></span><br><span class="line">lsmod | grep uio</span><br><span class="line">modprobe uio</span><br><span class="line"></span><br><span class="line"><span class="comment"># 加载编译好的igb\_uio</span></span><br><span class="line">insmod kmod/igb_uio.ko</span><br><span class="line">insmod kmod/rte_kni.ko</span><br></pre></td></tr></table></figure>
+
+<p>绑定网卡驱动</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看当前网卡信息</span></span><br><span class="line">./usertools/dpdk-devbind.py --status</span><br><span class="line"></span><br><span class="line"><span class="comment"># 首先保证网卡非活动</span></span><br><span class="line">ip <span class="built_in">link</span> <span class="built_in">set</span> ethx down</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用dpdk脚本进行绑定</span></span><br><span class="line">./usertools/dpdk-devbind.py --<span class="built_in">bind</span>=igb_uio 00:09.0 ...</span><br></pre></td></tr></table></figure>
+
+<p>设置 F-STACK 环境</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">export FF_PATH=/data/f-stack</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">设置 dpdk 库目录</span></span><br><span class="line">export FF_DPDK=/data/f-stack/dpdk/x86_64-native-linuxapp-gcc</span><br><span class="line">cd ../lib/</span><br><span class="line">make</span><br></pre></td></tr></table></figure>
+
+<p>安装 F-STACK</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">Install F-STACK</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">libfstack.a will be installed to /usr/local/lib</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">ff_*.h will be installed to /usr/local/include</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">start.sh will be installed to /usr/local/bin/ff_start</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">config.ini will be installed to /etc/f-stack.conf</span></span><br><span class="line">make install</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">output</span></span><br><span class="line">rm -rf /usr/local/lib/libfstack.a.1.21</span><br><span class="line">rm -rf /usr/local/lib/libfstack.a</span><br><span class="line">rm -rf /usr/local/include/ff_config.h</span><br><span class="line">rm -rf /usr/local/include/ff_api.h</span><br><span class="line">rm -rf /usr/local/include/ff_event.h</span><br><span class="line">rm -rf /usr/local/include/ff_errno.h</span><br><span class="line">rm -rf /usr/local/include/ff_epoll.h</span><br><span class="line">rm -rf /usr/local/bin/ff_start</span><br><span class="line">cp -f libfstack.a /usr/local/lib/libfstack.a.1.21</span><br><span class="line">ln -sf /usr/local/lib/libfstack.a.1.21 /usr/local/lib/libfstack.a</span><br><span class="line">cp -f ff_config.h /usr/local/include/ff_config.h</span><br><span class="line">cp -f ff_api.h /usr/local/include/ff_api.h</span><br><span class="line">cp -f ff_event.h /usr/local/include/ff_event.h</span><br><span class="line">cp -f ff_errno.h /usr/local/include/ff_errno.h</span><br><span class="line">cp -f ff_epoll.h /usr/local/include/ff_epoll.h</span><br><span class="line">cp -f /data/f-stack/lib/../start.sh /usr/local/bin/ff_start</span><br><span class="line">test -f &#x27;/etc/f-stack.conf&#x27; || cp -f /data/f-stack/lib/../config.ini /etc/f-stack.conf</span><br></pre></td></tr></table></figure>
+
+<h2 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h2><p>使用 example 测试 F-STACK 是否可以使用</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cd example &amp;&amp; make &amp;&amp; cd ..</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">执行此程序前需要修改 config.ini 配置好 ip 相关的设置</span></span><br><span class="line">./example/helloworld --conf config.ini --proc-type=primary --proc-id=0</span><br></pre></td></tr></table></figure>
+
+<p>在另一台机器上执行命令进行测试查看结果</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">➜  ~ curl -k http://10.20.48.80</span><br><span class="line">&lt;!DOCTYPE html&gt;</span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">&lt;title&gt;Welcome to F-Stack!&lt;/title&gt;</span><br><span class="line">&lt;style&gt;</span><br><span class="line">    body &#123;  </span><br><span class="line">        width: 35em;</span><br><span class="line">        margin: 0 auto; </span><br><span class="line">        font-family: Tahoma, Verdana, Arial, sans-serif;</span><br><span class="line">    &#125;</span><br><span class="line">&lt;/style&gt;</span><br><span class="line">&lt;/head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">&lt;h1&gt;Welcome to F-Stack!&lt;/h1&gt;</span><br><span class="line"></span><br><span class="line">&lt;p&gt;For online documentation and support please refer to</span><br><span class="line">&lt;a href=&quot;http://F-Stack.org/&quot;&gt;F-Stack.org&lt;/a&gt;.&lt;br/&gt;</span><br><span class="line"></span><br><span class="line">&lt;p&gt;&lt;em&gt;Thank you for using F-Stack.&lt;/em&gt;&lt;/p&gt;</span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure>
+
+<h2 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h2><p>执行 F-STACK 的 ifconfig 需要对 F-STACK 的环境已经初始化(即有使用 F-STACK 的进程正在运行)，如果没有就会出现如下错误</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost sbin]<span class="comment"># ./ifconfig</span></span><br><span class="line">PANIC <span class="keyword">in</span> rte_eal_config_attach():</span><br><span class="line">Cannot open <span class="string">&#x27;/var/run/.rte_config&#x27;</span> <span class="keyword">for</span> rte_mem_config</span><br><span class="line">7: [./ifconfig() [0x41355e]]</span><br><span class="line">6: [/lib64/libc.so.6(__libc_start_main+0xf5) [0x7f6b5f3a43d5]]</span><br><span class="line">5: [./ifconfig() [0x413dfd]]</span><br><span class="line">4: [./ifconfig() [0x4207a2]]</span><br><span class="line">3: [./ifconfig() [0x4458b4]]</span><br><span class="line">2: [./ifconfig() [0x405ee2]]</span><br><span class="line">1: [./ifconfig() [0x44b2ea]]</span><br><span class="line">已放弃</span><br></pre></td></tr></table></figure>
+
+<p>编译并启动 Nginx, for more details, see <a target="_blank" rel="noopener" href="https://github.com/F-Stack/f-stack/blob/master/doc/F-Stack_Nginx_APP_Guide.md">nginx guide</a>.</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">cd app/nginx-1.16.1</span><br><span class="line">bash ./configure --prefix=/usr/local/nginx_fstack --with-ff_module</span><br><span class="line">make</span><br><span class="line">make install</span><br><span class="line">cd ../..</span><br><span class="line">/usr/local/nginx_fstack/sbin/nginx</span><br></pre></td></tr></table></figure>
+
+<p>手动配置 DPDK PORT 的 IP</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/data/f-stack/tools//sbin/ifconfig f-stack-0 10.20.48.80</span><br></pre></td></tr></table></figure>
+
+<p>配置好 ip 之后在另一台机器上连接</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">➜  ~ curl -k http://10.20.48.80</span><br><span class="line">&lt;title&gt;Welcome to F-Stack Nginx!&lt;/title&gt;</span><br><span class="line"> pad data:0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789</span><br></pre></td></tr></table></figure>
+
+<p>编译并安装 Redis</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cd app/redis-5.0.5/</span><br><span class="line">make</span><br><span class="line">make install</span><br></pre></td></tr></table></figure>
+
+
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/dpdk/" rel="tag"># dpdk</a>
+              <a href="/tags/f-stack/" rel="tag"># f-stack</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2020/09/16/acr122u/" rel="prev" title="acr122u 使用">
+                  <i class="fa fa-angle-left"></i> acr122u 使用
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2020/09/27/build_aarch64_vm_with_qemu/" rel="next" title="使用 Qemu 搭建 aarch64 虚拟机">
+                  使用 Qemu 搭建 aarch64 虚拟机 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2023</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">collia</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>
